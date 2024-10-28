@@ -1,9 +1,18 @@
-const dotenv = require("dotenv");
+import dotenv from 'dotenv';
 dotenv.config({ path: './.env' });
-const express = require("express");
+import express from 'express';
 const app = express();
 
-const cookieParser = require('cookie-parser');
+import cookieParser from 'cookie-parser';
+
+// import all routes
+import userRouter from './routes/user';
+
+
+
+// version 1
+app.use('/api/v1/user', userRouter);
+
 
 
 
