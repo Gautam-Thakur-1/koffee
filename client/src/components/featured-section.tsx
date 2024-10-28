@@ -133,7 +133,7 @@ const FeaturedSection = () => {
 
       <p className="my-4 md:text-xl w-1/2 lg:w-1/3 text-center">
         Work together seamlessly with our real-time document editor. Edit
-        documents, see changes instantly, and chat directly
+        documents simultaneously, see changes instantly, and chat directly
         within the document.
       </p>
 
