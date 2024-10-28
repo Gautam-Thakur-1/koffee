@@ -23,7 +23,7 @@ const HeroSection = () => {
               ideas to life with <span className="font-bold">Koffee</span>.
             </p>
             <div className="space-x-4">
-              <Link to={"/register"}>
+              <Link to={"/auth/register"}>
                 <Button className="bg-blue-600 text-white hover:bg-blue-700">
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />

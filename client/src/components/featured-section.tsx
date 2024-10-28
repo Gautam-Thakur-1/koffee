@@ -3,27 +3,27 @@ import { useEffect, useRef } from "react";
 
 const productFeatures = [
   {
-    image: "src/assets/comments.png",
+    image: "src/assets/images/comments.png",
     title: "Collaboration",
     description: "Collaborate seamlessly within the document.",
   },
   {
-    image: "src/assets/text-editor.png",
+    image: "src/assets/images/text-editor.png",
     title: "Text Editor",
     description: "All collaborative features embedded in a text editor.",
   },
   {
-    image: "src/assets/realtime-apis.png",
+    image: "src/assets/images/realtime-apis.png",
     title: "Real-Time",
     description: "Instant visibility of changes as they happen.",
   },
   {
-    image: "src/assets/dashboard.png",
+    image: "src/assets/images/dashboard.png",
     title: "Lighting Fast",
     description: "Experience unmatched speed and responsiveness.",
   },
   {
-    image: "src/assets/infrastructure.png",
+    image: "src/assets/images/infrastructure.png",
     title: "Infrastructure",
     description: "Powered by MERN stack for scalability and reliability.",
   },
