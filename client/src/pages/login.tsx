@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { loginFormSchema as formSchema } from "../../schema";
+import { ChevronLeft } from "lucide-react";
 
 const Login = () => {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -57,7 +58,7 @@ const Login = () => {
         </div>
       </div>
 
-      <div className="w-full md:w-3/4 min-h-screen flex items-center lg:items-start justify-center flex-col lg:ps-36 gap-y-4">
+      <div className="w-full md:w-3/4 min-h-screen flex items-center px-8 md:px-0 lg:items-start justify-center flex-col lg:ps-36 gap-y-4">
         <div className="w-full max-w-md flex flex-col justify-center">
           <h2 className="text-3xl font-bold my-4">Sign in to Koffee</h2>
           <Button variant="outline" className="w-full my-4">
@@ -133,6 +134,15 @@ const Login = () => {
             <Link to={"/auth/register"}>Don't have an account? Sign up</Link>
           </Button>
         </div>
+      </div>
+
+      <div className="flex md:hidden absolute top-4 left-0">
+        <Link to={"/"}>
+          <Button className="" variant={"link"}>
+            <ChevronLeft />
+            Back to home
+          </Button>
+        </Link>
       </div>
     </div>
   );

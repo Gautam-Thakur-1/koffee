@@ -34,7 +34,7 @@ const RegisterForm = () => {
   }
 
   return (
-    <div className="w-full max-w-md py-4 flex flex-col items-center">
+    <div className="w-full max-w-md py-4 flex flex-col items-center px-8 md:px-0">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">

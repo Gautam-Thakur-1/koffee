@@ -53,12 +53,12 @@ const Register = () => {
           </>
         ) : (
           <div className="w-full md:w-3/4 min-h-screen flex items-center lg:items-start justify-center flex-col lg:ps-36">
-            <div className="w-1/2">
+            <div className="md:w-1/2 px-8 md:px-0">
               <h1 className="text-xl my-2">Welcome!</h1>
               <h1 className="text-3xl font-bold">Sign up to Koffee</h1>
 
               <div className="flex my-8 flex-col gap-y-4">
-                <Button className="rounded-full bg-black md:w-64 lg:w-96 h-14 flex text-md items-center justify-center text-white">
+                <Button className="rounded-full bg-black md:w-64 lg:w-96 h-14 flex sm:text-md items-center justify-center text-white">
                   <img
                     src="../src/assets/images/google.svg"
                     alt=""
@@ -75,7 +75,7 @@ const Register = () => {
 
                 <Button
                   variant={"secondary"}
-                  className="rounded-full bg-neutral-100 md:w-64 lg:w-96 h-14 flex text-md items-center justify-center text-black"
+                  className="rounded-full bg-neutral-100 md:w-64 lg:w-96 h-14 flex sm:text-md items-center justify-center text-black"
                   onClick={() => setOpen(true)}
                 >
                   Continue with Email
@@ -108,6 +108,15 @@ const Register = () => {
             </div>
           </div>
         )}
+      </div>
+
+      <div className="flex md:hidden absolute top-4 left-0">
+        <Link to={"/"}>
+          <Button className="" variant={"link"}>
+            <ChevronLeft />
+            Back to home
+          </Button>
+        </Link>
       </div>
     </div>
   );
