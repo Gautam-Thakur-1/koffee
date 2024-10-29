@@ -13,7 +13,7 @@ const MainNavbar = () => {
         <div className="flex items-center gap-x-4">
           <NavRoutes />
 
-          <Link to={"/register"}>
+          <Link to={"/auth/register"}>
             <Button className="">Get Started</Button>
           </Link>
         </div>
