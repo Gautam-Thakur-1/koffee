@@ -9,7 +9,7 @@ import sendToken from "../utils/jwtToken";
 
 export const userRegister = async (req: Request, res: Response) => {
   try {
-    const { name, userName, email, password } = req.body;
+    const { name, userName, email, password, avatar } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ msg: "Please enter all fields" });
     }
@@ -26,6 +26,7 @@ export const userRegister = async (req: Request, res: Response) => {
       email,
       userName,
       password,
+      avatar,
     });
     return res.status(201).json({ msg: "User created successfully" });
   } catch (error) {
@@ -76,6 +77,7 @@ export const userLogin = async (req: Request, res: Response) => {
 
     // use send token function to send the token
     sendToken(user, accessToken, res);
+    return res.status(200);
   } catch (error) {
     console.log(error);
     return res
@@ -132,9 +134,14 @@ export const checkLogin = async (req: Request, res: Response) => {
     if (!decoded) {
       return res
         .status(401)
-        .json({ message: "Not authorized to access this route", success: false });
+        .json({
+          message: "Not authorized to access this route",
+          success: false,
+        });
     }
-    return res.status(200).json({ success: true, data: decoded , message: "User is logged in" });
+    return res
+      .status(200)
+      .json({ success: true, data: decoded, message: "User is logged in" });
   } catch (error) {
     console.log("error.......", error);
     return res.status(500).json({ error: "error while generating token" });
@@ -164,13 +171,11 @@ export const userLogout = async (req: Request, res: Response) => {
       expires: new Date(Date.now() + 10 * 1000),
       httpOnly: true,
     });
-    res
-      .status(200)
-      .json({
-        success: true,
-        data: {},
-        message: "User logged out successfully",
-      });
+    res.status(200).json({
+      success: true,
+      data: {},
+      message: "User logged out successfully",
+    });
   } catch (error) {
     console.log(error);
     return res

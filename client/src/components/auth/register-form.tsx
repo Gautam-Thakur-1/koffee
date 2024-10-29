@@ -16,6 +16,8 @@ import {
 import { Input } from "../../components/ui/input";
 import { Link } from "react-router-dom";
 import { registerFormSchema as formSchema } from "../../../schema";
+import toast from "react-hot-toast";
+import { registerUser } from "../../actions/user-actions";
 
 const RegisterForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -29,8 +31,32 @@ const RegisterForm = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const avatar = `https://api.dicebear.com/9.x/dylan/svg?seed=${encodeURIComponent(
+      values.username
+    )}&size=64`;
+
+    try {
+      const res = await registerUser(
+        values.name,
+        values.username,
+        values.email,
+        values.password,
+        avatar
+      );
+
+      if (res.success === true) {
+        toast.success("Account created successfully");
+
+        // Redirect user to login page
+        setTimeout(() => {
+          window.location.href = "/auth/login";
+        }, 1000);
+      }
+    } catch (error) {
+      console.log("REGISTER_FORM_ERROR", error);
+      toast.error("Internal server error");
+    }
   }
 
   return (

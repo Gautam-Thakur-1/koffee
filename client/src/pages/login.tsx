@@ -16,8 +16,14 @@ import { z } from "zod";
 
 import { loginFormSchema as formSchema } from "../../schema";
 import { ChevronLeft } from "lucide-react";
+import { loginUser } from "../actions/user-actions";
+import toast from "react-hot-toast";
+import { useState } from "react";
+import { AxiosError } from "axios";
 
 const Login = () => {
+  const [loading, setLoading] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -26,8 +32,36 @@ const Login = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const isEmail = values.usernameOrEmail.includes("@");
+
+    try {
+      setLoading(true);
+
+      const res = await loginUser(
+        isEmail,
+        values.password,
+        values.usernameOrEmail
+      );
+
+      if (res.success === true) {
+        toast.success("Logged in successfully");
+
+        // Redirect user to home page
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1000);
+      }
+    } catch (error) {
+      const err = error as AxiosError;
+      if (err.response?.status === 400) {
+        toast.error("Invalid Email or Password");
+      } else {
+        toast.error("Internal server error");
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -125,6 +159,7 @@ const Login = () => {
               <Button
                 type="submit"
                 className="w-full bg-[#0d0c22] hover:bg-[#0d0c22]/90"
+                disabled={loading}
               >
                 Sign In
               </Button>
