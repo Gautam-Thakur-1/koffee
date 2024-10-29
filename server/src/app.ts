@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Import routes after applying middleware
-import userRouter from './routes/user';
+import userRouter from './routes/user-routes';
 
 
 

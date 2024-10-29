@@ -3,11 +3,13 @@ import { Request, Response } from "express";
 import { generateAccessToken } from "../utils/generateAccessToken";
 import jwt from "jsonwebtoken";
 import sendToken from "../utils/jwtToken";
+
 // @route POST /api/v1/user/register
 // @desc Register user
+
 export const userRegister = async (req: Request, res: Response) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, userName, email, password } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ msg: "Please enter all fields" });
     }
@@ -15,7 +17,6 @@ export const userRegister = async (req: Request, res: Response) => {
     if (user) {
       return res.status(400).json({ msg: "User already exists" });
     }
-    const userName = email.split("@")[0];
     const userNameExistence = await User.findOne({ userName });
     if (userNameExistence) {
       return res.status(400).json({ msg: "Username already exists" });
@@ -29,7 +30,7 @@ export const userRegister = async (req: Request, res: Response) => {
     return res.status(201).json({ msg: "User created successfully" });
   } catch (error) {
     console.log(error);
-    res.status(500).send("Server Error");
+    res.status(500).json({ error: error });
   }
 };
 
@@ -118,6 +119,7 @@ export const checkLogin = async (req: Request, res: Response) => {
     ) {
       token = req.headers.authorization.split(" ")[1];
     }
+
     if (!token) {
       return res
         .status(401)
