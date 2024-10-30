@@ -9,7 +9,7 @@ import sendToken from "../utils/jwtToken";
 
 export const userRegister = async (req: Request, res: Response) => {
   try {
-    const { name, userName, email, password } = req.body;
+    const { name, userName, email, password, avatar } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ msg: "Please enter all fields" });
     }
@@ -26,8 +26,11 @@ export const userRegister = async (req: Request, res: Response) => {
       email,
       userName,
       password,
+      avatar,
     });
-    return res.status(201).json({ msg: "User created successfully" });
+    return res.status(201).json({
+      msg: "User created successfully",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error });
@@ -56,26 +59,27 @@ export const userLogin = async (req: Request, res: Response) => {
     if (!user) {
       return res
         .status(400)
-        .json({ message: "user not found", success: false });
+        .json({ message: "User Not Found", success: false });
     }
     const isPasswordValid = await user.matchPassword(password);
     if (!isPasswordValid) {
       return res
         .status(400)
-        .json({ message: "invalid password", success: false });
+        .json({ message: "Invalid Password", success: false });
     }
     const accessToken = await generateAccessToken(user?._id);
     const loggedInUser = {
+      id: user._id,
       name: user.name,
       email: user.email,
       userName: user.userName,
       isAdmin: user.isAdmin,
-      profilePic: user.profilePic,
-      accessToken,
+      avatar: user.avatar,
+      // accessToken,
     };
 
     // use send token function to send the token
-    sendToken(user, accessToken, res);
+    sendToken(user, accessToken, res, loggedInUser);
   } catch (error) {
     console.log(error);
     return res
@@ -84,7 +88,7 @@ export const userLogin = async (req: Request, res: Response) => {
   }
 };
 
-// @route GET /api/v1/user:emailId
+// @route GET /api/v1/credential/:{emailId or userName}
 // @desc Get user by emailId or userName
 
 export const specificUserDetails = async (req: Request, res: Response) => {
@@ -107,18 +111,12 @@ export const specificUserDetails = async (req: Request, res: Response) => {
   }
 };
 
-// @route GET /api/v1/user/check-login
+// @route GET /api/v1/user/verify
 // @desc Check if user is logged in
 
 export const checkLogin = async (req: Request, res: Response) => {
   try {
-    let token;
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
-    ) {
-      token = req.headers.authorization.split(" ")[1];
-    }
+    const token = req.cookies.token;
 
     if (!token) {
       return res
@@ -130,11 +128,14 @@ export const checkLogin = async (req: Request, res: Response) => {
     }
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     if (!decoded) {
-      return res
-        .status(401)
-        .json({ message: "Not authorized to access this route", success: false });
+      return res.status(401).json({
+        message: "Not authorized to access this route",
+        success: false,
+      });
     }
-    return res.status(200).json({ success: true, data: decoded , message: "User is logged in" });
+    return res
+      .status(200)
+      .json({ success: true, data: decoded, message: "User is logged in" });
   } catch (error) {
     console.log("error.......", error);
     return res.status(500).json({ error: "error while generating token" });
@@ -164,13 +165,11 @@ export const userLogout = async (req: Request, res: Response) => {
       expires: new Date(Date.now() + 10 * 1000),
       httpOnly: true,
     });
-    res
-      .status(200)
-      .json({
-        success: true,
-        data: {},
-        message: "User logged out successfully",
-      });
+    res.status(200).json({
+      success: true,
+      data: {},
+      message: "User logged out successfully",
+    });
   } catch (error) {
     console.log(error);
     return res

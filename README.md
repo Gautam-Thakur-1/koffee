@@ -45,5 +45,10 @@ npm run dev
 
 ```bash
 cd ../server
-npm run dev
+
+# Setup environment variables
+cp .env.example .env
+
+# Start the server
+nodemon
 ```

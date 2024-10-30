@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import {
   Form,
@@ -16,8 +16,13 @@ import { z } from "zod";
 
 import { loginFormSchema as formSchema } from "../../schema";
 import { ChevronLeft } from "lucide-react";
+import useAuthStore from "../stores/useAuthStore";
+import toast from "react-hot-toast";
 
 const Login = () => {
+  const authStore: any = useAuthStore();
+  const navigate = useNavigate();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -26,8 +31,30 @@ const Login = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const isEmail = values.usernameOrEmail.includes("@");
+
+    const credentials = {
+      isEmail,
+      loginField: values.usernameOrEmail,
+      password: values.password,
+    };
+
+    const response = await authStore.login(credentials);
+
+    if (response.success) {
+      toast.success("Logged in successfully");
+
+      setTimeout(() => {
+        navigate("/user/dashboard");
+      }, 1000);
+    }
+
+    if (!response.success) {
+      toast.error(response.error);
+    }
+
+    form.reset();
   }
 
   return (
@@ -125,6 +152,7 @@ const Login = () => {
               <Button
                 type="submit"
                 className="w-full bg-[#0d0c22] hover:bg-[#0d0c22]/90"
+                disabled={authStore.loading}
               >
                 Sign In
               </Button>
