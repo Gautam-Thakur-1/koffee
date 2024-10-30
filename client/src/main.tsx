@@ -7,6 +7,7 @@ import "./index.css";
 import App from "./pages/App.tsx";
 import Register from "./pages/register.tsx";
 import Login from "./pages/login.tsx";
+import Dashboard from "./pages/dashboard.tsx";
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
   {
     path: "/auth/login",
     element: <Login />,
+  },
+  {
+    path: "/user/dashboard",
+    element: <Dashboard />,
   },
 ]);
 

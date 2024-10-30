@@ -28,7 +28,9 @@ export const userRegister = async (req: Request, res: Response) => {
       password,
       avatar,
     });
-    return res.status(201).json({ msg: "User created successfully" });
+    return res.status(201).json({
+      msg: "User created successfully",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error });
@@ -57,26 +59,27 @@ export const userLogin = async (req: Request, res: Response) => {
     if (!user) {
       return res
         .status(400)
-        .json({ message: "user not found", success: false });
+        .json({ message: "User Not Found", success: false });
     }
     const isPasswordValid = await user.matchPassword(password);
     if (!isPasswordValid) {
       return res
         .status(400)
-        .json({ message: "invalid password", success: false });
+        .json({ message: "Invalid Password", success: false });
     }
     const accessToken = await generateAccessToken(user?._id);
     const loggedInUser = {
+      id: user._id,
       name: user.name,
       email: user.email,
       userName: user.userName,
       isAdmin: user.isAdmin,
-      profilePic: user.profilePic,
-      accessToken,
+      avatar: user.avatar,
+      // accessToken,
     };
 
     // use send token function to send the token
-    sendToken(user, accessToken, res);
+    sendToken(user, accessToken, res, loggedInUser);
   } catch (error) {
     console.log(error);
     return res

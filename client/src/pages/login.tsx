@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import {
   Form,
@@ -16,13 +16,12 @@ import { z } from "zod";
 
 import { loginFormSchema as formSchema } from "../../schema";
 import { ChevronLeft } from "lucide-react";
-import { loginUser } from "../actions/user-actions";
+import useAuthStore from "../stores/useAuthStore";
 import toast from "react-hot-toast";
-import { useState } from "react";
-import { AxiosError } from "axios";
 
 const Login = () => {
-  const [loading, setLoading] = useState(false);
+  const authStore: any = useAuthStore();
+  const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -35,33 +34,27 @@ const Login = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const isEmail = values.usernameOrEmail.includes("@");
 
-    try {
-      setLoading(true);
+    const credentials = {
+      isEmail,
+      loginField: values.usernameOrEmail,
+      password: values.password,
+    };
 
-      const res = await loginUser(
-        isEmail,
-        values.password,
-        values.usernameOrEmail
-      );
+    const response = await authStore.login(credentials);
 
-      if (res.success === true) {
-        toast.success("Logged in successfully");
+    if (response.success) {
+      toast.success("Logged in successfully");
 
-        // Redirect user to home page
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 1000);
-      }
-    } catch (error) {
-      const err = error as AxiosError;
-      if (err.response?.status === 400) {
-        toast.error("Invalid Email or Password");
-      } else {
-        toast.error("Internal server error");
-      }
-    } finally {
-      setLoading(false);
+      setTimeout(() => {
+        navigate("/user/dashboard");
+      }, 1000);
     }
+
+    if (!response.success) {
+      toast.error(response.error);
+    }
+
+    form.reset();
   }
 
   return (
@@ -159,7 +152,7 @@ const Login = () => {
               <Button
                 type="submit"
                 className="w-full bg-[#0d0c22] hover:bg-[#0d0c22]/90"
-                disabled={loading}
+                disabled={authStore.loading}
               >
                 Sign In
               </Button>

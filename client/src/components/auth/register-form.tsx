@@ -7,19 +7,22 @@ import { Checkbox } from "../../components/ui/checkbox";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "../../components/ui/form";
 import { Input } from "../../components/ui/input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { registerFormSchema as formSchema } from "../../../schema";
+import useAuthStore from "../../stores/useAuthStore";
 import toast from "react-hot-toast";
-import { registerUser } from "../../actions/user-actions";
 
 const RegisterForm = () => {
+  const authStore: any = useAuthStore();
+
+  const navigate = useNavigate();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -32,31 +35,32 @@ const RegisterForm = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    const { name, username, email, password } = values;
+
     const avatar = `https://api.dicebear.com/9.x/dylan/svg?seed=${encodeURIComponent(
       values.username
     )}&size=64`;
 
-    try {
-      const res = await registerUser(
-        values.name,
-        values.username,
-        values.email,
-        values.password,
-        avatar
-      );
+    const response = await authStore.register(
+      name,
+      username,
+      email,
+      password,
+      avatar
+    );
 
-      if (res.success === true) {
-        toast.success("Account created successfully");
+    if (response.success) {
+      toast.success("Account created successfully");
 
-        // Redirect user to login page
-        setTimeout(() => {
-          window.location.href = "/auth/login";
-        }, 1000);
-      }
-    } catch (error) {
-      console.log("REGISTER_FORM_ERROR", error);
-      toast.error("Internal server error");
+      setTimeout(() => {
+        navigate("/auth/login");
+      }, 1000);
     }
+
+    if (!response.success) {
+      toast.error(response.error);
+    }
+    form.reset();
   }
 
   return (
