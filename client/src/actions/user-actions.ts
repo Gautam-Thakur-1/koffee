@@ -16,10 +16,12 @@ export async function registerUser(
         email,
         password,
         avatar,
+      },
+      {
+        withCredentials: true
       }
     );
 
-    console.log(res.data);
     return res.data;
   } catch (error) {
     console.log("REGISTER_USER_ERROR", error);
@@ -39,17 +41,22 @@ export async function loginUser(
           {
             email: loginField,
             password,
+          },
+          {
+            withCredentials: true,
           }
         )
       : await axios.post(
           `${import.meta.env.VITE_SERVER_URL}/api/v1/user/login`,
-          { 
+          {
             userName: loginField,
             password,
+          },
+          {
+            withCredentials: true,
           }
         );
 
-    console.log(res.data);
     return res.data;
   } catch (error) {
     console.log("LOGIN_USER_ERROR", error);

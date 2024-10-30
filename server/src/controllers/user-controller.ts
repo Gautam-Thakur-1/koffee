@@ -77,7 +77,6 @@ export const userLogin = async (req: Request, res: Response) => {
 
     // use send token function to send the token
     sendToken(user, accessToken, res);
-    return res.status(200);
   } catch (error) {
     console.log(error);
     return res
@@ -86,7 +85,7 @@ export const userLogin = async (req: Request, res: Response) => {
   }
 };
 
-// @route GET /api/v1/user:emailId
+// @route GET /api/v1/credential/:{emailId or userName}
 // @desc Get user by emailId or userName
 
 export const specificUserDetails = async (req: Request, res: Response) => {
@@ -109,18 +108,12 @@ export const specificUserDetails = async (req: Request, res: Response) => {
   }
 };
 
-// @route GET /api/v1/user/check-login
+// @route GET /api/v1/user/verify
 // @desc Check if user is logged in
 
 export const checkLogin = async (req: Request, res: Response) => {
   try {
-    let token;
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
-    ) {
-      token = req.headers.authorization.split(" ")[1];
-    }
+    const token = req.cookies.token;
 
     if (!token) {
       return res
@@ -132,12 +125,10 @@ export const checkLogin = async (req: Request, res: Response) => {
     }
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     if (!decoded) {
-      return res
-        .status(401)
-        .json({
-          message: "Not authorized to access this route",
-          success: false,
-        });
+      return res.status(401).json({
+        message: "Not authorized to access this route",
+        success: false,
+      });
     }
     return res
       .status(200)
