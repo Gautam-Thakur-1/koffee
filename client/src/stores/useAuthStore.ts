@@ -44,7 +44,7 @@ const useAuthStore = create(
 
       // Actions
       setLoading: (loading: boolean) => set({ loading }),
-      setError: (error: any) => set({ error }),
+      setError: (error: string | null) => set({ error }),
 
       // Check authentication status
       checkAuth: async () => {
