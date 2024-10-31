@@ -2,8 +2,12 @@ import { ArrowRight } from "lucide-react";
 import NeonCircle from "./neon-circle";
 import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
+import useAuthStore from "../stores/useAuthStore";
 
 const HeroSection = () => {
+  const authStore: any = useAuthStore();
+  const isAuthenticated = authStore.isAuthenticated;
+
   return (
     <div className="w-full h-full">
       <div className="absolute inset-0 flex items-center justify-center -z-10">
@@ -23,12 +27,18 @@ const HeroSection = () => {
               ideas to life with <span className="font-bold">Koffee</span>.
             </p>
             <div className="space-x-4">
-              <Link to={"/auth/register"}>
-                <Button className="bg-blue-600 text-white hover:bg-blue-700">
-                  Get Started
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+              {isAuthenticated ? (
+                <Link to="/user/dashboard">
+                  <Button className="bg-blue-500 hover:bg-blue-700">
+                    View Dashboard
+                    <ArrowRight size={16} className="ml-2" />
+                  </Button>
+                </Link>
+              ) : (
+                <Link to={"/auth/register"}>
+                  <Button>Get Started</Button>
+                </Link>
+              )}
               <Link to={"/#features"}>
                 <Button variant="outline">Learn More</Button>
               </Link>

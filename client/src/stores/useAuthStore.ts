@@ -58,7 +58,7 @@ const useAuthStore = create(
           );
 
           set({
-            user: response.data,
+            user: response.data.user,
             isAuthenticated: true,
             loading: false,
           });
@@ -187,36 +187,6 @@ const useAuthStore = create(
           return {
             success: false,
             error: error.response?.data?.message || "Logout failed",
-          };
-        }
-      },
-
-      // Update user profile
-      updateProfile: async (userData: UserDataType) => {
-        try {
-          set({ loading: true, error: null });
-          const response = await axios.put(
-            `${import.meta.env.VITE_SERVER_URL}/api/v1/user/profile`,
-            userData,
-            {
-              withCredentials: true,
-            }
-          );
-
-          set({
-            user: response.data.user,
-            loading: false,
-          });
-
-          return { success: true };
-        } catch (error: any) {
-          set({
-            loading: false,
-            error: error.response?.data?.message || "Profile update failed",
-          });
-          return {
-            success: false,
-            error: error.response?.data?.message || "Profile update failed",
           };
         }
       },

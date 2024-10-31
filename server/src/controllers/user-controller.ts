@@ -135,7 +135,7 @@ export const checkLogin = async (req: Request, res: Response) => {
     }
     return res
       .status(200)
-      .json({ success: true, data: decoded, message: "User is logged in" });
+      .json({ success: true, user: decoded, message: "User is logged in" });
   } catch (error) {
     console.log("error.......", error);
     return res.status(500).json({ error: "error while generating token" });

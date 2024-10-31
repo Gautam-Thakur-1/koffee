@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom";
 import NavRoutes from "./nav-routes";
 import { Button } from "../ui/button";
+import useAuthStore from "../../stores/useAuthStore";
 
 const MainNavbar = () => {
+  const authStore: any = useAuthStore();
+  const isAuthenticated = authStore.isAuthenticated;
+
   return (
     <div className="h-full w-full z-30">
       <header className="px-4 lg:px-6 h-14 flex items-center justify-between">
@@ -13,9 +17,17 @@ const MainNavbar = () => {
         <div className="flex items-center gap-x-4">
           <NavRoutes />
 
-          <Link to={"/auth/register"}>
-            <Button className="">Get Started</Button>
-          </Link>
+          {isAuthenticated ? (
+            <Link to="/user/dashboard">
+              <Button className="bg-blue-500 hover:bg-blue-700">
+                View Dashboard
+              </Button>
+            </Link>
+          ) : (
+            <Link to={"/auth/register"}>
+              <Button>Get Started</Button>
+            </Link>
+          )}
         </div>
       </header>
     </div>
