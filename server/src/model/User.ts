@@ -53,6 +53,7 @@ userSchema.methods.getSignedJwtToken = function () {
       name: this.name,
       email: this.email,
       userName: this.userName,
+      avatar: this.avatar,
       isAdmin: this.isAdmin,
     },
     process.env.SECRET_KEY as string,

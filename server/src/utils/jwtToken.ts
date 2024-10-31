@@ -9,12 +9,12 @@ const sendToken = (
   accessToken: string,
   res: Response,
   loggedInUser: {
-    id: string,
-    name: string,
-    email: string,
-    userName: string,
-    isAdmin: boolean,
-    avatar: string,
+    id: string;
+    name: string;
+    email: string;
+    userName: string;
+    isAdmin: boolean;
+    avatar: string;
     // accessToken : string,
   }
 ) => {

@@ -24,8 +24,6 @@ const Main = () => {
 
   const isAuthenticated = authStore.isAuthenticated;
 
-  console.log(isAuthenticated);
-
   const protectRoute = (element: React.ReactNode) => {
     return isAuthenticated ? element : <Navigate to="/auth/login" />;
   };

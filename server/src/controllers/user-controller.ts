@@ -133,6 +133,7 @@ export const checkLogin = async (req: Request, res: Response) => {
         success: false,
       });
     }
+
     return res
       .status(200)
       .json({ success: true, user: decoded, message: "User is logged in" });
