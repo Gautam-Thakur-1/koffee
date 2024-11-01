@@ -11,8 +11,13 @@ import "./index.css";
 import App from "./pages/App.tsx";
 import Register from "./pages/register.tsx";
 import Login from "./pages/login.tsx";
-import Dashboard from "./pages/dashboard.tsx";
 import useAuthStore from "./stores/useAuthStore.ts";
+import DashboardLayout from "./components/dashboard/layout.tsx";
+import Dashboard from "./components/dashboard/dashboard.tsx";
+import WorkspaceTeams from "./components/dashboard/workspace/workspace-teams.tsx";
+import WorkspaceProjects from "./components/dashboard/workspace/workspace-projects.tsx";
+import ProfileSetting from "./components/dashboard/user/profile-setting.tsx";
+import Account from "./components/dashboard/user/account.tsx";
 
 const Main = () => {
   const authStore: any = useAuthStore();
@@ -47,7 +52,16 @@ const Main = () => {
     },
     {
       path: "/user/dashboard",
-      element: protectRoute(<Dashboard />),
+      element: protectRoute(<DashboardLayout />),
+      children: [
+        { index: true, element: <Dashboard /> },
+        { path: "workspace/team", element: <WorkspaceTeams /> },
+        { path: "workspace/projects", element: <WorkspaceProjects /> },
+
+        { path: "settings/profile", element: <ProfileSetting /> },
+        { path: "settings/account", element: <Account /> },
+        { path: "settings/billing", element: <div>Billing</div> },
+      ],
     },
   ]);
 

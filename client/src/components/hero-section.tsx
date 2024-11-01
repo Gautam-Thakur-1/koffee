@@ -29,7 +29,7 @@ const HeroSection = () => {
             <div className="space-x-4">
               {isAuthenticated ? (
                 <Link to="/user/dashboard">
-                  <Button className="bg-blue-500 hover:bg-blue-700">
+                  <Button>
                     View Dashboard
                     <ArrowRight size={16} className="ml-2" />
                   </Button>

@@ -59,7 +59,7 @@ const Login = () => {
 
   return (
     <div className="w-full h-full flex items-center relative">
-      <div className="hidden md:w-1/5 min-h-screen md:flex">
+      <div className="hidden md:w-1/3 lg:w-1/5 min-h-screen md:flex">
         <div className="z-10">
           <Link to={"/"}>
             <img
