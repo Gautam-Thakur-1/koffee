@@ -19,7 +19,7 @@ const MainNavbar = () => {
 
           {isAuthenticated ? (
             <Link to="/user/dashboard">
-              <Button className="bg-blue-500 hover:bg-blue-700">
+              <Button>
                 View Dashboard
               </Button>
             </Link>
