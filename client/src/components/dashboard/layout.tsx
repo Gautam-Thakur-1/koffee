@@ -15,7 +15,7 @@ const DashboardLayout = () => {
           <WorkspaceNav userName={user.name} />
         </div>
 
-        <div className="w-full h-full">
+        <div className="w-full mx-auto h-full">
           <Outlet />
         </div>
       </div>

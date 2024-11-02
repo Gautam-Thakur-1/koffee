@@ -20,7 +20,9 @@ const UserNav = () => {
     <div className="w-full h-12 border-b px-4">
       <div className="lg:max-w-7xl mx-auto flex items-center h-full justify-between">
         <nav className="flex items-center gap-x-2 h-full">
-          <img src={"/src/assets/logo.svg"} alt="logo" className="w-24" />
+          <Link to={"/"}>
+            <img src={"/src/assets/logo.svg"} alt="logo" className="w-24" />
+          </Link>
 
           <ul className="hidden md:flex h-full items-center gap-x-4">
             {navLinks.map((link) => (
