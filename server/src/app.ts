@@ -21,8 +21,14 @@ app.use(
 
 // Import routes after applying middleware
 import userRouter from "./routes/user-routes";
+import roomRouter from "./routes/room-routes";
+import documentRouter from "./routes/document-routes";
+
 
 // Define routes after middleware
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/room", roomRouter);
+app.use("/api/v1/document", documentRouter);
+
 
 module.exports = app;

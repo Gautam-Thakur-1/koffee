@@ -29,6 +29,18 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    Document: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Document",
+      },
+    ],
+    Room: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Room",
+      },
+    ],
     isAdmin: {
       type: Boolean,
       default: false,
@@ -57,7 +69,7 @@ userSchema.methods.getSignedJwtToken = function () {
       isAdmin: this.isAdmin,
     },
     process.env.SECRET_KEY as string,
-    { expiresIn: process.env.JWT_EXPIRE }
+    { expiresIn: '7d' }
   );
 };
 
