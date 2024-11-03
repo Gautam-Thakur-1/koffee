@@ -144,7 +144,7 @@ const FeaturedSection = () => {
         {productFeatures.map((feature, index) => (
           <div
             key={index}
-            className="p-8 border-[0.5px] flex flex-col items-center justify-center text-center border-neutral-700 relative z-10"
+            className="p-8 border-[0.5px]  border-neutral-700 relative z-10"
           >
             <img src={feature.image} alt={feature.title} className= " object-contain h-20" />
             <h1 className="text-lg font-bold mt-4">{feature.title}</h1>
