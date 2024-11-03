@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import axios from "axios";
-import { User as UserDataType } from "../../types";
 
 type CredentialsType = {
   isEmail: boolean;
@@ -9,33 +8,9 @@ type CredentialsType = {
   loginField: string;
 };
 
-type AuthState = {
-  user: UserDataType | null;
-  loading: boolean;
-  isAuthenticated: boolean;
-  error: string | null;
-};
-
-type AuthActions = {
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
-  checkAuth: () => Promise<boolean>;
-  register: (
-    userData: UserDataType
-  ) => Promise<{ success: boolean; error?: string }>;
-  login: (
-    credentials: CredentialsType
-  ) => Promise<{ success: boolean; error?: string }>;
-  logout: () => Promise<{ success: boolean; error?: string }>;
-  updateProfile: (
-    userData: UserDataType
-  ) => Promise<{ success: boolean; error?: string }>;
-  clearErrors: () => void;
-};
-
 const useAuthStore = create(
   persist(
-    (set, get) => ({
+    (set: any, get: any) => ({
       // Initial state
       user: null,
       loading: false,
@@ -58,7 +33,7 @@ const useAuthStore = create(
           );
 
           set({
-            user: response.data,
+            user: response.data.user,
             isAuthenticated: true,
             loading: false,
           });
@@ -114,7 +89,7 @@ const useAuthStore = create(
       },
 
       // Login user
-      login: async (credentials : CredentialsType) => {
+      login: async (credentials: CredentialsType) => {
         try {
           set({ loading: true, error: null });
           const response = credentials.isEmail
@@ -162,11 +137,15 @@ const useAuthStore = create(
 
       // Logout
       logout: async () => {
+        const user = get().user;
+
         try {
           set({ loading: true, error: null });
           await axios.post(
             `${import.meta.env.VITE_SERVER_URL}/api/v1/user/logout`,
-            {},
+            {
+              email: user.email,
+            },
             {
               withCredentials: true,
             }
@@ -187,36 +166,6 @@ const useAuthStore = create(
           return {
             success: false,
             error: error.response?.data?.message || "Logout failed",
-          };
-        }
-      },
-
-      // Update user profile
-      updateProfile: async (userData: UserDataType) => {
-        try {
-          set({ loading: true, error: null });
-          const response = await axios.put(
-            `${import.meta.env.VITE_SERVER_URL}/api/v1/user/profile`,
-            userData,
-            {
-              withCredentials: true,
-            }
-          );
-
-          set({
-            user: response.data.user,
-            loading: false,
-          });
-
-          return { success: true };
-        } catch (error: any) {
-          set({
-            loading: false,
-            error: error.response?.data?.message || "Profile update failed",
-          });
-          return {
-            success: false,
-            error: error.response?.data?.message || "Profile update failed",
           };
         }
       },
