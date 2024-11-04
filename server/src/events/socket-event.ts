@@ -61,7 +61,6 @@ function socketEvents(io: any) {
         // Handle canvas updates from the client
         socket.on("update-canvas", async (update: any) => {
           try {
-            console.log("Received update type:", typeof update); // Log type of update for debugging
             const updateArray = decodeUpdate(update); // Decode the base64 string to Uint8Array
             Y.applyUpdate(yDoc, updateArray);
 

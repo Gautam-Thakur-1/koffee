@@ -2,21 +2,25 @@ const mongoose = require("mongoose");
 
 const channelSchema = new mongoose.schema(
   {
-    Owners: [
+    organizer: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
       },
     ],
-    name: {
+    channelName: {
       type: String,
       required: true,
     },
-    description: {
+    channelDescription: {
       type: String,
       required: false,
     },
+    accessTokens : [{
+      type: String,
+      required: true,
+    }],
     canvas: {
       type: mongoose.schema.Types.ObjectId,
       ref: "Canvas",

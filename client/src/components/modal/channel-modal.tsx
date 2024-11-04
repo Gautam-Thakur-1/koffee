@@ -1,46 +1,64 @@
 import { Modal } from "../ui/modal";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { Check, Clipboard } from "lucide-react";
 import { useState } from "react";
-import { Clipboard } from "lucide-react";
 
-interface SessionModalProps {
+interface ChannelModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  channelId: string;
   loading: boolean;
 }
 
-const SessionModal = ({
+const ChannelModal = ({
   isOpen,
   onClose,
   onConfirm,
+  channelId,
   loading,
-}: SessionModalProps) => {
-  const [sessionId, setSessionId] = useState<string>("");
+}: ChannelModalProps) => {
+  const [copied, setCopied] = useState(false);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
+
+    setCopied(true);
   };
+
+  if (copied) {
+    setTimeout(() => {
+      setCopied(false);
+    }, 5000);
+  }
 
   return (
     <Modal
-      title={"Create Session"}
-      description={"New session for your team to collaborate"}
+      title={"Create Channel"}
+      description={"New channel for your team to collaborate"}
       isOpen={isOpen}
       onClose={onClose}
     >
       <div className="w-full mb-5 flex gap-x-4 items-center">
         <Input
-          disabled
-          placeholder="1234-5678-9012"
-          value={"1234-5678-9012"}
-          className=""
+          value={channelId}
+          onChange={() => {}}
+          placeholder={"Channel ID"}
+          readOnly
         />
 
         {/* Add copy to clipboard button */}
-        <Button size={"icon"} variant={"outline"}>
-          <Clipboard size={18}/>
+        <Button
+          size={"icon"}
+          variant={"outline"}
+          onClick={() => handleCopy(channelId)}
+        >
+          {!copied ? (
+            <Clipboard size={16} />
+          ) : (
+            <Check size={16} className="text-green-500" />
+          )}
         </Button>
       </div>
       <div className={"w-full space-x-2 flex items-center justify-end"}>
@@ -55,4 +73,4 @@ const SessionModal = ({
   );
 };
 
-export default SessionModal;
+export default ChannelModal;

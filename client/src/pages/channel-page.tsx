@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 
 import Editor from "../channel/Editor";
@@ -9,6 +10,8 @@ const ChannelPage = () => {
   if (!channelId) {
     return <Navigate to={"/user/dashboard"} />;
   }
+
+  const [loading, setLoading] = useState(true);
 
   return (
     <>
