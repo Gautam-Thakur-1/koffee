@@ -1,26 +1,39 @@
 import User from "../model/User";
 import Room from "../model/Room";
 import { Request, Response } from "express";
-import { isOauth } from "../middleweres/isOauth";
+import { v4 as uuidv4 } from 'uuid';
+import { authorizeUser } from "../middleweres/isOauth";
 
 // @route POST /api/v1/room/create
 // @desc Create a room
 
-export const createRoom = async (req: Request, res: Response) => {
-    try {
-        const { name, members, objective,sendApproval,uniqueId,adminId } = req.body;
-        if (!name || !members || !objective) {
+export const createRoom = async (req: any, res: Response) => {
+
+    try {        
+        const { name, members, objective,sendApproval } = req.body;
+        if (!name || !objective) {
             return res.status(400).json({ message: "Please enter all fields" });
         }
+        const userId = req.user._id;
+        console.log(req?.user?._id);
         const room = await Room.create({
             name,
             members,
             objective,
             sendApproval,
-            adminId: req.body.userId,
-            uniqueId
+            adminId:  userId,
+            uniqueId:uuidv4()
         });
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { $push: { Room: room._id } },
+            { new: true } // Return the updated user
+          );        
+        console.log("jhgjkhlkhli,",room._id,userId,user);
+   
         return res.status(201).json({
+            success: true,
             message: "Room created successfully",
             data: room
         });
@@ -28,7 +41,7 @@ export const createRoom = async (req: Request, res: Response) => {
         
     } catch (error) {
         console.log(error);
-        res.status(500).json({ error: error });
+        return res.status(500).json({ error: error });
         
     }
 }
@@ -125,8 +138,8 @@ export const sendApproval = async (req: Request, res: Response) => {
         if (!room) {
             return res.status(400).json({ message: "Room not found" });
         }
-        if(room?.adminId?.toString() !== req.body.userId){
-            return res.status(400).json({ message: "You are not authorized to approve this room" });
+        if(room?.adminId?.toString() === req.body.userId){
+            return res.status(400).json({ message: "You are already a member",success:false });
         }
         if(room.waitingMembers.includes(req.body.userId)){
             return res.status(400).json({ message: "You have already sent approval to this user" });
@@ -156,17 +169,20 @@ export const approveUser = async (req: Request, res: Response) => {
         if (!room) {
             return res.status(400).json({ message: "Room not found" });
         }
-        if(room?.adminId?.toString() !== req.body.userId){
+        const matchUser = authorizeUser(req, res);
+        if(room?.adminId?.toString() !== matchUser.toString()){
             return res.status(400).json({ message: "You are not authorized to approve this room" });
         }
-        if(room.waitingMembers.includes(req.body.userId)){
-            room.members.push(req.body.userId);
-            room.waitingMembers = room.waitingMembers.filter((member: any) => member.toString() !== req.body.userId);
-            await room.save();
-            return res.status(200).json({
-                message: "User approved successfully"
-            });
-        }
+            
+            if(room.waitingMembers.includes(req.body.userId)){
+                room.members.push(req.body.userId);
+                room.waitingMembers = room.waitingMembers.filter((member: any) => member.toString() !== req.body.userId);
+                await room.save();
+                return res.status(200).json({
+                    message: "User approved successfully"
+                });
+            }
+        
         return res.status(400).json({ message: "User not found in waiting list" });
         
     } catch (error) {
@@ -179,14 +195,15 @@ export const approveUser = async (req: Request, res: Response) => {
 // @route post /api/v1/room/reject/:id
 // @desc reject user to join room by admin send him to suspended list
 
-export const rejectUser = async (req: Request, res: Response) => {
+export const rejectUser = async (req: Request, res: Response ) => {
     try {
         const room = await Room.findById(req.params.id);
         if (!room) {
             return res.status(400).json({ message: "Room not found" });
         }
-        if(room?.adminId?.toString() !== req.body.userId){
-            return res.status(400).json({ message: "You are not authorized to reject this room" });
+        const matchUser = authorizeUser(req, res);
+        if(room?.adminId?.toString() !== matchUser.toString()){
+            return res.status(400).json({ message: "You are not authorized to reject user" });
         }
         if(room.waitingMembers.includes(req.body.userId)){
             room.suspendedMembers.push(req.body.userId);
