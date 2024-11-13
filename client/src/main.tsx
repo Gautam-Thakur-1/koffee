@@ -18,6 +18,7 @@ import WorkspaceTeams from "./components/dashboard/workspace/workspace-teams.tsx
 import WorkspaceProjects from "./components/dashboard/workspace/workspace-projects.tsx";
 import ProfileSetting from "./components/dashboard/user/profile-setting.tsx";
 import Account from "./components/dashboard/user/account.tsx";
+import ChannelPage from "./pages/channel-page.tsx";
 
 const Main = () => {
   const authStore: any = useAuthStore();
@@ -49,6 +50,10 @@ const Main = () => {
     {
       path: "/auth/login",
       element: isAuthenticated ? <Navigate to="/user/dashboard" /> : <Login />,
+    },
+    {
+      path: "/channel/:channelId",
+      element: <ChannelPage />,
     },
     {
       path: "/user/dashboard",

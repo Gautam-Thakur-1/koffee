@@ -1,9 +1,12 @@
 import { Plus } from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
+
 import greetUser from "../../lib/greet-user";
 import useAuthStore from "../../stores/useAuthStore";
 import { Button } from "../ui/button";
 import SessionTable from "../session-table";
-import SessionModal from "../modal/session-modal";
+import { useEffect, useState } from "react";
+import ChannelModal from "../modal/channel-modal";
 
 // TODO: Fix Session Modal functions
 
@@ -11,12 +14,25 @@ const Dashboard = () => {
   const authStore: any = useAuthStore();
   const user = authStore.user;
 
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [channelId, setChannelId] = useState("");
+
+  useEffect(() => {
+    setChannelId(uuidv4());
+  },[])
+
+  const handleCreateChannel = () => {
+    setLoading(true);
+  };
+
   return (
     <>
-      <SessionModal
-        isOpen={false}
-        onClose={() => {}}
-        onConfirm={() => {}}
+      <ChannelModal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        onConfirm={() => handleCreateChannel()}
+        channelId={channelId}
         loading={false}
       />
 
@@ -30,9 +46,9 @@ const Dashboard = () => {
         <header className="w-full h-full flex items-center justify-between mt-6 py-2">
           <h1 className="text-lg">Sessions</h1>
 
-          <Button className="text-xs" size={"sm"}>
+          <Button className="text-xs" size={"sm"} onClick={() => setOpen(true)}>
             <Plus size={12} />
-            <span className="ml-1">Create Session</span>
+            <span className="ml-1">Create Channel</span>
           </Button>
         </header>
 

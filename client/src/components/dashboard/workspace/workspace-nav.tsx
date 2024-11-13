@@ -1,7 +1,6 @@
 import {
   AtSign,
   DollarSign,
-  Grid2X2,
   LayoutPanelTop,
   Settings2,
   User2,
