@@ -3,6 +3,7 @@ import FeaturedSection from "../components/featured-section";
 import HeroSection from "../components/hero-section";
 import MainNavbar from "../components/navigation/main-navbar";
 import { useEffect } from "react";
+import Footer from "../components/footer";
 
 function App() {
   useEffect(() => {
@@ -23,6 +24,7 @@ function App() {
       <MainNavbar />
       <HeroSection />
       <FeaturedSection />
+      <Footer/>
     </>
   );
 }
