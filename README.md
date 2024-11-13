@@ -45,7 +45,10 @@ npm run dev
 
 ```bash
 cd ../server
-npm run dev
-```
 
-contributer ARUN,ASHISH,AMAN,Gautam
+# Setup environment variables
+cp .env.example .env
+
+# Start the server
+nodemon
+```
