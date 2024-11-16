@@ -1,28 +1,32 @@
 const mongoose = require("mongoose");
 
-const channelSchema = new mongoose.schema(
+const channelSchema = new mongoose.Schema(
   {
-    organizer: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-      },
-    ],
+    organizer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    channelId: {
+      type: String,
+      required: true,
+    },
     channelName: {
       type: String,
       required: true,
     },
     channelDescription: {
       type: String,
-      required: false,
     },
-    accessTokens : [{
-      type: String,
-      required: true,
-    }],
+    connectedMembersId: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+    ],
     canvas: {
-      type: mongoose.schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Canvas",
     },
   },

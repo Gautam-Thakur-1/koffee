@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import ChannelModal from "../modal/channel-modal";
 import { Input } from "../ui/input";
 import toast from "react-hot-toast";
+import { createChannel } from "../../actions/channel-actions";
 
 const Dashboard = () => {
   const authStore: any = useAuthStore();
@@ -16,8 +17,15 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
+  if (!user) {
+    return navigate("/auth/login");
+  }
+
   const [open, setOpen] = useState(false);
   const [connectionString, setConnectionString] = useState("");
+  const [connectionType, setConnectionType] = useState<
+    "connect" | "request-access"
+  >("request-access");
   const [loading, setLoading] = useState(false);
   const [channelId, setChannelId] = useState("");
 
@@ -26,19 +34,42 @@ const Dashboard = () => {
   }, []);
 
   const handleConnectChannel = (connectionString: string) => {
+    setConnectionType("request-access");
+
     if (!connectionString) {
       toast.error("Please enter a connection string");
     } else if (connectionString.length < 36) {
       toast.error("Invalid connection string");
     } else if (connectionString.length === 36) {
-      navigate(`/channel/${connectionString}`);
+      navigate(`/channel/${connectionString}?type=${connectionType}`);
     } else {
       toast.error("Something went wrong");
     }
   };
 
-  const handleCreateChannel = () => {
-    setLoading(true);
+  const handleCreateChannel = async (channelId: string) => {
+    try {
+      setLoading(true);
+      setOpen(false);
+
+      const res = await createChannel(
+        channelId,
+        "Untitled",
+        "Channel for collaboration",
+        user.id
+      );
+
+      if (res.error) {
+        toast.error(res.error);
+      } else {
+        setConnectionType("connect");
+        return navigate(`/channel/${channelId}?type=${connectionType}`);
+      }
+    } catch (error) {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -46,7 +77,7 @@ const Dashboard = () => {
       <ChannelModal
         isOpen={open}
         onClose={() => setOpen(false)}
-        onConfirm={() => handleCreateChannel()}
+        onConfirm={() => handleCreateChannel(channelId)}
         channelId={channelId}
         loading={loading}
       />
@@ -62,6 +93,7 @@ const Dashboard = () => {
             type="text"
             placeholder="Paste connection string"
             className="text-xs"
+            maxLength={36}
             value={connectionString}
             onChange={(e) => setConnectionString(e.target.value)}
           />

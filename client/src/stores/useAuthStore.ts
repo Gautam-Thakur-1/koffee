@@ -10,7 +10,7 @@ type CredentialsType = {
 
 const useAuthStore = create(
   persist(
-    (set, get) => ({
+    (set: any, get: any) => ({
       // Initial state
       user: null,
       loading: false,
@@ -76,7 +76,7 @@ const useAuthStore = create(
           });
 
           return { success: true };
-        } catch (error : any) {
+        } catch (error: any) {
           set({
             loading: false,
             error: error.response?.data?.message || "Registration failed",

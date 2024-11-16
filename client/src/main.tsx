@@ -19,6 +19,7 @@ import WorkspaceProjects from "./components/dashboard/workspace/workspace-projec
 import ProfileSetting from "./components/dashboard/user/profile-setting.tsx";
 import Account from "./components/dashboard/user/account.tsx";
 import ChannelPage from "./pages/channel-page.tsx";
+import { Toaster as ShadcnToaster } from "./components/ui/toaster.tsx";
 
 const Main = () => {
   const authStore: any = useAuthStore();
@@ -72,6 +73,7 @@ const Main = () => {
 
   return (
     <StrictMode>
+      <ShadcnToaster />
       <Toaster />
       <RouterProvider router={router} />
     </StrictMode>

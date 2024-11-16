@@ -1,11 +1,24 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Editor from "../channel/Editor";
-import ChannelNav from "../channel/channel-nav";
+import useAuthStore from "../stores/useAuthStore";
 
 const ChannelPage = () => {
   const { channelId } = useParams();
   const navigate = useNavigate();
+
+  const authStore: any = useAuthStore();
+  const user = authStore.user;
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/auth/login");
+    }
+  }, [user, navigate]);
+
+  if (!user) return null;
+
+  const userId = user.id;
 
   useEffect(() => {
     if (!channelId) {
@@ -39,12 +52,9 @@ const ChannelPage = () => {
   if (!channelId) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <ChannelNav />
-      <main className="max-w-3xl min-h-[calc(100vh-4.5rem)] h-full mt-12 p-4 mx-auto">
-        <Editor channelId={channelId} />
-      </main>
-    </div>
+    <>
+      <Editor channelId={channelId} userId={userId} />
+    </>
   );
 };
 
