@@ -1,26 +1,41 @@
-import { Plus } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
+import { Merge, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import greetUser from "../../lib/greet-user";
 import useAuthStore from "../../stores/useAuthStore";
 import { Button } from "../ui/button";
-import SessionTable from "../session-table";
 import { useEffect, useState } from "react";
 import ChannelModal from "../modal/channel-modal";
-
-// TODO: Fix Session Modal functions
+import { Input } from "../ui/input";
+import toast from "react-hot-toast";
 
 const Dashboard = () => {
   const authStore: any = useAuthStore();
   const user = authStore.user;
 
+  const navigate = useNavigate();
+
   const [open, setOpen] = useState(false);
+  const [connectionString, setConnectionString] = useState("");
   const [loading, setLoading] = useState(false);
   const [channelId, setChannelId] = useState("");
 
   useEffect(() => {
     setChannelId(uuidv4());
-  },[])
+  }, []);
+
+  const handleConnectChannel = (connectionString: string) => {
+    if (!connectionString) {
+      toast.error("Please enter a connection string");
+    } else if (connectionString.length < 36) {
+      toast.error("Invalid connection string");
+    } else if (connectionString.length === 36) {
+      navigate(`/channel/${connectionString}`);
+    } else {
+      toast.error("Something went wrong");
+    }
+  };
 
   const handleCreateChannel = () => {
     setLoading(true);
@@ -33,7 +48,7 @@ const Dashboard = () => {
         onClose={() => setOpen(false)}
         onConfirm={() => handleCreateChannel()}
         channelId={channelId}
-        loading={false}
+        loading={loading}
       />
 
       <div className="w-full h-full p-4">
@@ -42,63 +57,48 @@ const Dashboard = () => {
           Welcome back! Ready to create, collaborate, and bring ideas to life?
         </p>
 
-        {/* Header */}
-        <header className="w-full h-full flex items-center justify-between mt-6 py-2">
-          <h1 className="text-lg">Sessions</h1>
+        <div className="my-4 flex items-center gap-x-4 md:max-w-sm">
+          <Input
+            type="text"
+            placeholder="Paste connection string"
+            className="text-xs"
+            value={connectionString}
+            onChange={(e) => setConnectionString(e.target.value)}
+          />
 
-          <Button className="text-xs" size={"sm"} onClick={() => setOpen(true)}>
-            <Plus size={12} />
-            <span className="ml-1">Create Channel</span>
+          <Button
+            onClick={() => handleConnectChannel(connectionString)}
+            className="flex items-center"
+            size={"sm"}
+            disabled={!connectionString}
+          >
+            <Merge size={14} />
+            <span>Connect</span>
           </Button>
-        </header>
+        </div>
 
-        <hr />
+        <div className="my-4 md:max-w-sm border rounded-md p-3">
+          <div className="flex items-center gap-x-2">
+            <Plus className="text-green-400" size={22} />
+            <span className="font-bold">Create Channel</span>
+          </div>
 
-        {/* Sessions */}
-        <SessionTable
-          sessionsHeaders={["id", "Title", "Description", "Members", "Actions"]}
-          sessionsData={sessions}
-        />
+          <p className="text-xs text-neutral-500 my-2">
+            Create new channel and invite others.
+          </p>
+
+          <Button
+            className="w-full text-xs mt-2 mb-4"
+            size={"sm"}
+            onClick={() => setOpen(true)}
+            disabled={loading}
+          >
+            Create New Channel
+          </Button>
+        </div>
       </div>
     </>
   );
 };
 
 export default Dashboard;
-
-const sessions = [
-  {
-    id: "1",
-    title: "Design Sprint",
-    description: "loren ipsum dolor sit amet, consectetur adipiscing elit",
-    members: [
-      {
-        id: "1",
-        name: "John Doe",
-        avatar: "https://randomuser.me/api/portraits",
-      },
-      {
-        id: "2",
-        name: "Jane Doe",
-        avatar: "https://randomuser.me/api/portraits",
-      },
-    ],
-  },
-  {
-    id: "2",
-    title: "Product Design",
-    description: "lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    members: [
-      {
-        id: "1",
-        name: "John Doe",
-        avatar: "https://randomuser.me/api/portraits",
-      },
-      {
-        id: "2",
-        name: "Jane Doe",
-        avatar: "https://randomuser.me/api/portraits",
-      },
-    ],
-  },
-];

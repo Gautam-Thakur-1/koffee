@@ -31,11 +31,11 @@ const Editor = ({ channelId }: { channelId: string }) => {
     });
 
     setSocket(s);
-
     return () => {
       s.disconnect();
     };
   }, [channelId, ydoc]);
+
 
   // Initializing Editor
   const editor = useEditor({
