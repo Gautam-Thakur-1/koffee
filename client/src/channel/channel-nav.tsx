@@ -1,7 +1,7 @@
 const ChannelNav = ({
   connectionStatus,
 }: {
-  connectionStatus: "connected" | "waiting";
+  connectionStatus: "connected" | "waiting" | "denied" | "error";
 }) => {
   return (
     <div className="w-full h-12 flex items-center fixed top-0 justify-between px-4 border-b">
@@ -15,6 +15,12 @@ const ChannelNav = ({
             <div className="w-1 h-1 rounded-full bg-green-500 mr-2 animate-ping"></div>
             Connected
           </div>
+        )}
+        {connectionStatus === "denied" && (
+          <div className="text-sm text-red-500">Connection denied</div>
+        )}
+        {connectionStatus === "error" && (
+          <div className="text-sm text-red-500">Connection error</div>
         )}
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 
@@ -10,10 +10,10 @@ import Collaboration from "@tiptap/extension-collaboration";
 import StarterKit from "@tiptap/starter-kit";
 
 import { decodeUpdate, encodeUpdate } from "../lib/editor-helper";
-import WaitingPage from "./waiting-page";
 import ChannelNav from "./channel-nav";
 import toast from "react-hot-toast";
 import ConnectAccessToast from "../components/modal/connect-acccess-toast";
+import ConnectionStatusPage from "./connection-status-page";
 
 type RequestType = {
   userId: string;
@@ -31,11 +31,13 @@ const Editor = ({
   const [ydoc] = useState(() => new Y.Doc());
   const [error, setError] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<
-    "connected" | "waiting"
+    "connected" | "waiting" | "denied" | "error"
   >("waiting");
   const [isInitialized, setIsInitialized] = useState(false);
 
   const location = useLocation();
+  const navigate = useNavigate();
+
   const queryParams = new URLSearchParams(location.search);
   const connectionType = queryParams.get("type");
 
@@ -43,7 +45,6 @@ const Editor = ({
   const [userAccessRequests, setUserAccessRequests] = useState<RequestType[]>(
     []
   );
-  const [isUserAccessRequestOpen, setIsUserAccessRequestOpen] = useState(false);
 
   const handleEditorCreate = useCallback(
     ({ editor }: { editor: TipTapEditor }) => {
@@ -135,9 +136,27 @@ const Editor = ({
       }
     });
 
-    s.on("grant-access", () => {
+    s.on("access-granted", () => {
+      console.log("granted access you can join");
+
       setConnectionStatus("connected");
+      toast.success("Connected to channel");
+
+      navigate(`/channel/${channelId}?type=connect`);
+
       s.emit("connect-channel", { channelId, userId });
+    });
+
+    s.on("access-denied", () => {
+      console.log("Access denied");
+
+      setError("Access denied");
+      toast.error("Access denied");
+
+      s.disconnect();
+      setTimeout(() => {
+        navigate("/user/dashboard");
+      }, 1000);
     });
 
     s.on("user-access-request", ({ userId, userName }) => {
@@ -145,7 +164,6 @@ const Editor = ({
         const userExists = requests.some((req) => req.userId === userId);
         return userExists ? requests : [...requests, { userId, userName }];
       });
-      setIsUserAccessRequestOpen(true);
     });
 
     s.on("error", (error) => {
@@ -182,13 +200,24 @@ const Editor = ({
     };
   }, [editor, socket, ydoc, handleInitialState, handleUpdate, updateHandler]);
 
+  // Handle user access requests
   const handleAcceptRequest = (userId: string) => {
+    console.log("Accepting request from", userId);
+
     setUserAccessRequests((requests) =>
       requests.filter((r) => r.userId !== userId)
     );
 
-    setIsUserAccessRequestOpen(false);
     socket?.emit("grant-access", { channelId, userId });
+  };
+
+  const handleRejectRequest = (userId: string) => {
+    console.log("Rejecting request from", userId);
+    setUserAccessRequests((requests) =>
+      requests.filter((r) => r.userId !== userId)
+    );
+
+    socket?.emit("reject-access", { channelId, userId });
   };
 
   const uniqueUserAccessRequests = Array.from(
@@ -205,7 +234,9 @@ const Editor = ({
         <ChannelNav connectionStatus={connectionStatus} />
       </div>
 
-      {connectionStatus === "waiting" && <WaitingPage />}
+      {connectionStatus !== "connected" && (
+        <ConnectionStatusPage connectionStatus={connectionStatus} />
+      )}
 
       {connectionStatus === "connected" && (
         <div className="p-4 w-full h-full mt-12 max-w-xl mx-auto">
@@ -219,11 +250,7 @@ const Editor = ({
             key={request.userId}
             userName={request.userName}
             onAccept={() => handleAcceptRequest(request.userId)}
-            onReject={() =>
-              setUserAccessRequests((requests) =>
-                requests.filter((r) => r.userId !== request.userId)
-              )
-            }
+            onReject={() => handleRejectRequest(request.userId)}
           />
         ))}
     </div>

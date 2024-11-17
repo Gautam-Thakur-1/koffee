@@ -7,6 +7,9 @@ import { decodeUpdate, encodeUpdate } from "../utils/helper";
 // Admin socketId to userId map
 const adminSocketIdMap = new Map();
 
+// Access Request userId to channelId map
+const accessRequestMap = new Map();
+
 // Cache Map
 const activeCanvas = new Map();
 
@@ -60,6 +63,7 @@ function socketEvents(io: any) {
 
           // Retrieve or create canvas
           let canvas = await Canvas.findOne({ channelId });
+
           if (!canvas) {
             const yDoc = new Y.Doc();
             const initialContent = Y.encodeStateAsUpdate(yDoc);
@@ -138,13 +142,21 @@ function socketEvents(io: any) {
 
         const channel = await Channel.findOne({ channelId });
 
-        console.log("Request access", channelId, userId);
+        console.log("Request access", socket.id, userId);
 
         if (!channel) {
           return socket.emit("error", "Channel not found");
         }
 
         const user = await User.findById(userId);
+
+        if (!user) {
+          return socket.emit("error", "User not found");
+        }
+
+        accessRequestMap.set(userId, channelId);
+
+        console.log(accessRequestMap);
 
         const organizerId = channel.organizer.toString();
         const isAdmin = organizerId === userId;
@@ -169,7 +181,6 @@ function socketEvents(io: any) {
           }
 
           socket.to(adminSocketId).emit("user-access-request", {
-            channelId,
             userId,
             userName: user.name,
           });
@@ -200,6 +211,12 @@ function socketEvents(io: any) {
 
           console.log("Access granted to", userId);
 
+          socket
+            .to(accessRequestMap.get(userId))
+            .emit("access-granted", "Connect to channel");
+
+          accessRequestMap.delete(userId);
+
           socket.emit(
             "channel-members",
             io.sockets.adapter.rooms.get(channelId)?.size
@@ -208,6 +225,20 @@ function socketEvents(io: any) {
           console.error("ERROR_GRANT_ACCESS", error);
           socket.emit("error", "Failed to grant access");
         }
+      }
+    );
+
+    socket.on(
+      "reject-access",
+      async (data: { channelId: string; userId: string }) => {
+        const { channelId, userId } = data;
+
+        socket
+          .to(accessRequestMap.get(userId))
+          .emit("access-denied", "Access denied");
+        accessRequestMap.delete(userId);
+
+        console.log("Access denied to", socket.id, userId);
       }
     );
   });

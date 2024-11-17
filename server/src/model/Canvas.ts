@@ -10,6 +10,7 @@ const canvasSchema = new mongoose.Schema(
     channelId: {
       type: String,
       required: true,
+      unique : true
     },
     author: {
       type: mongoose.Schema.Types.ObjectId,

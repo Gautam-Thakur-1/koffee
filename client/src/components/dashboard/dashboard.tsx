@@ -9,7 +9,8 @@ import { useEffect, useState } from "react";
 import ChannelModal from "../modal/channel-modal";
 import { Input } from "../ui/input";
 import toast from "react-hot-toast";
-import { createChannel } from "../../actions/channel-actions";
+import { createChannel, getChannelById } from "../../actions/channel-actions";
+import { AxiosError } from "axios";
 
 const Dashboard = () => {
   const authStore: any = useAuthStore();
@@ -23,9 +24,6 @@ const Dashboard = () => {
 
   const [open, setOpen] = useState(false);
   const [connectionString, setConnectionString] = useState("");
-  const [connectionType, setConnectionType] = useState<
-    "connect" | "request-access"
-  >("request-access");
   const [loading, setLoading] = useState(false);
   const [channelId, setChannelId] = useState("");
 
@@ -33,15 +31,25 @@ const Dashboard = () => {
     setChannelId(uuidv4());
   }, []);
 
-  const handleConnectChannel = (connectionString: string) => {
-    setConnectionType("request-access");
-
+  const handleConnectChannel = async (connectionString: string) => {
     if (!connectionString) {
       toast.error("Please enter a connection string");
     } else if (connectionString.length < 36) {
       toast.error("Invalid connection string");
     } else if (connectionString.length === 36) {
-      navigate(`/channel/${connectionString}?type=${connectionType}`);
+      try {
+        await getChannelById(connectionString);
+
+        return navigate(`/channel/${connectionString}?type=request-access`);
+      } catch (error: AxiosError | any) {
+        console.log("Error connecting channel:", error);
+
+        if (error.response?.status === 404) {
+          toast.error("Channel not found");
+        } else {
+          toast.error("Something went wrong");
+        }
+      }
     } else {
       toast.error("Something went wrong");
     }
@@ -62,8 +70,7 @@ const Dashboard = () => {
       if (res.error) {
         toast.error(res.error);
       } else {
-        setConnectionType("connect");
-        return navigate(`/channel/${channelId}?type=${connectionType}`);
+        return navigate(`/channel/${channelId}?type=connect`);
       }
     } catch (error) {
       toast.error("Something went wrong");

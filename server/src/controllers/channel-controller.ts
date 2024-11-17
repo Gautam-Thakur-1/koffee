@@ -29,3 +29,23 @@ export const createChannel = async (req: Request, res: Response) => {
     res.status(500).json({ error: error });
   }
 };
+
+// @route GET /api/v1/channel/:channelId
+// @desc Get a channel by id
+
+export const getChannelById = async (req: Request, res: Response) => {
+  const { channelId } = req.params;
+
+  try {
+    const channel = await Channel.findOne({ channelId });
+
+    if (!channel) {
+      return res.status(404).json({ error: "Channel not found" });
+    }
+
+    res.status(200).json({ channel });
+  } catch (error) {
+    console.error("Error getting channel:", error);
+    res.status(500).json({ error });
+  }
+};

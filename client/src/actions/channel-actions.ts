@@ -14,14 +14,24 @@ export async function createChannel(
         channelName,
         channelDescription,
         organizerId,
-      },
-      {
-        withCredentials: true,
       }
     );
 
     return response.data;
   } catch (error) {
     console.error("Error creating channel:", error);
+  }
+}
+
+export async function getChannelById(channelId: string) {
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_SERVER_URL}/api/v1/channel/${channelId}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error getting channel:", error);
+    throw error
   }
 }
