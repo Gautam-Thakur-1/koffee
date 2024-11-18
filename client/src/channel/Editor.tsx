@@ -137,25 +137,33 @@ const Editor = ({
     });
 
     s.on("access-granted", () => {
-      console.log("granted access you can join");
+      console.log("Access granted, joining channel");
 
       setConnectionStatus("connected");
-      toast.success("Connected to channel");
+      toast.success("Connected to channel", {
+        duration: 3000,
+      });
 
-      navigate(`/channel/${channelId}?type=connect`);
+      // Use replace instead of push to prevent back navigation to the request state
+      navigate(`/channel/${channelId}?type=connect`, { replace: true });
 
-      s.emit("connect-channel", { channelId, userId });
+      // Emit connect-channel after navigation
+      setTimeout(() => {
+        s.emit("connect-channel", { channelId, userId });
+      }, 100);
     });
 
     s.on("access-denied", () => {
       console.log("Access denied");
+      setConnectionStatus("denied");
 
-      setError("Access denied");
-      toast.error("Access denied");
+      toast.error("Access denied", {
+        duration: 3000,
+      });
 
       s.disconnect();
       setTimeout(() => {
-        navigate("/user/dashboard");
+        navigate("/user/dashboard", { replace: true });
       }, 1000);
     });
 
@@ -201,32 +209,45 @@ const Editor = ({
   }, [editor, socket, ydoc, handleInitialState, handleUpdate, updateHandler]);
 
   // Handle user access requests
-  const handleAcceptRequest = (userId: string) => {
-    console.log("Accepting request from", userId);
+  const handleAcceptRequest = useCallback(
+    (userId: string) => {
+      console.log("Accepting request from", userId);
 
-    setUserAccessRequests((requests) =>
-      requests.filter((r) => r.userId !== userId)
-    );
+      // Remove the request immediately from UI
+      setUserAccessRequests((prevRequests) => {
+        const updatedRequests = prevRequests.filter(
+          (request) => request.userId !== userId
+        );
+        return updatedRequests;
+      });
 
-    socket?.emit("grant-access", { channelId, userId });
-  };
+      socket?.emit("grant-access", { channelId, userId });
+    },
+    [socket, channelId]
+  );
 
-  const handleRejectRequest = (userId: string) => {
-    console.log("Rejecting request from", userId);
-    setUserAccessRequests((requests) =>
-      requests.filter((r) => r.userId !== userId)
-    );
+  const handleRejectRequest = useCallback(
+    (userId: string) => {
+      console.log("Rejecting request from", userId);
 
-    socket?.emit("reject-access", { channelId, userId });
-  };
+      // Remove the request immediately from UI
+      setUserAccessRequests((prevRequests) => {
+        const updatedRequests = prevRequests.filter(
+          (request) => request.userId !== userId
+        );
+        return updatedRequests;
+      });
 
-  const uniqueUserAccessRequests = Array.from(
-    new Set(userAccessRequests.map((a) => a.userId))
-  ).map((userId) => userAccessRequests.find((a) => a.userId === userId)!);
+      socket?.emit("reject-access", { channelId, userId });
+    },
+    [socket, channelId]
+  );
 
   if (!editor) {
     return error ? <div>{toast.error(error)}</div> : null;
   }
+
+  console.log(userAccessRequests);
 
   return (
     <div className="w-full h-full">
@@ -244,8 +265,8 @@ const Editor = ({
         </div>
       )}
 
-      {uniqueUserAccessRequests.length > 0 &&
-        uniqueUserAccessRequests.map((request) => (
+      {userAccessRequests.length > 0 &&
+        userAccessRequests.map((request) => (
           <ConnectAccessToast
             key={request.userId}
             userName={request.userName}

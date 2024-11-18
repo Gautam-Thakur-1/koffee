@@ -141,7 +141,6 @@ function socketEvents(io: any) {
         const { channelId, userId } = data;
 
         const channel = await Channel.findOne({ channelId });
-
         console.log("Request access", socket.id, userId);
 
         if (!channel) {
@@ -154,37 +153,36 @@ function socketEvents(io: any) {
           return socket.emit("error", "User not found");
         }
 
-        accessRequestMap.set(userId, channelId);
-
-        console.log(accessRequestMap);
+        // Store socket.id instead of channelId
+        accessRequestMap.set(userId, socket.id);
 
         const organizerId = channel.organizer.toString();
         const isAdmin = organizerId === userId;
 
         if (isAdmin) {
-          socket.emit("grant-access");
+          socket.emit("access-granted");
+          return;
         }
 
         const isMemberAlreadyInChannel =
           channel.connectedMembersId.includes(userId);
 
         if (isMemberAlreadyInChannel) {
-          return socket.emit("grant-access");
+          socket.emit("access-granted");
+          return;
         }
 
-        if (!isMemberAlreadyInChannel || !isAdmin) {
-          // send request to admin
-          const adminSocketId = adminSocketIdMap.get(organizerId);
+        // Send request to admin
+        const adminSocketId = adminSocketIdMap.get(organizerId);
 
-          if (!adminSocketId) {
-            return socket.emit("error", "Admin not found");
-          }
-
-          socket.to(adminSocketId).emit("user-access-request", {
-            userId,
-            userName: user.name,
-          });
+        if (!adminSocketId) {
+          return socket.emit("error", "Admin not found");
         }
+
+        io.to(adminSocketId).emit("user-access-request", {
+          userId,
+          userName: user.name,
+        });
       }
     );
 
@@ -211,16 +209,21 @@ function socketEvents(io: any) {
 
           console.log("Access granted to", userId);
 
-          socket
-            .to(accessRequestMap.get(userId))
-            .emit("access-granted", "Connect to channel");
+          // Get requesting user's socket ID
+          const requestingSocketId = accessRequestMap.get(userId);
 
-          accessRequestMap.delete(userId);
+          if (requestingSocketId) {
+            // Emit directly to the requesting socket
+            io.to(requestingSocketId).emit(
+              "access-granted",
+              "Connect to channel"
+            );
+            accessRequestMap.delete(userId);
+          }
 
-          socket.emit(
-            "channel-members",
-            io.sockets.adapter.rooms.get(channelId)?.size
-          );
+          // Update channel members count
+          const roomSize = io.sockets.adapter.rooms.get(channelId)?.size || 0;
+          io.to(channelId).emit("channel-members", roomSize);
         } catch (error) {
           console.error("ERROR_GRANT_ACCESS", error);
           socket.emit("error", "Failed to grant access");
@@ -233,10 +236,11 @@ function socketEvents(io: any) {
       async (data: { channelId: string; userId: string }) => {
         const { channelId, userId } = data;
 
-        socket
-          .to(accessRequestMap.get(userId))
-          .emit("access-denied", "Access denied");
-        accessRequestMap.delete(userId);
+        const requestingSocketId = accessRequestMap.get(userId);
+        if (requestingSocketId) {
+          io.to(requestingSocketId).emit("access-denied", "Access denied");
+          accessRequestMap.delete(userId);
+        }
 
         console.log("Access denied to", socket.id, userId);
       }
