@@ -10,6 +10,7 @@ import ConnectionStatusPage from "../connection-status-page";
 import { useCustomCursorTracking } from "./hooks/use-custom-cursor-tracking";
 import useAuthStore from "../../stores/useAuthStore";
 import { getRandomColor } from "./utils/colors";
+import { useCollaborativeHighlight } from "./hooks/use-collaborative-highlighting";
 
 interface EditorProps {
   channelId: string;
@@ -26,6 +27,11 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
   const authStore: any = useAuthStore();
   const user = authStore.user;
 
+  const currentUserData = {
+    name: user.userName,
+    color: randomColor,
+  }
+
   const {
     socket,
     error,
@@ -37,6 +43,7 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
 
   const { editor, ydoc, handleUpdate, handleInitialState, updateHandler } =
     useCollaborativeEditor(socket);
+
 
   React.useEffect(() => {
     if (!socket || !editor) return;
@@ -66,11 +73,17 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
     editor,
     socket,
     channelId,
-    {
-      name: user.userName,
-      color: randomColor,
-    }
+    currentUserData
   );
+
+  const {remoteHighlights ,renderRemoteHighlights } = useCollaborativeHighlight(
+    editor,
+    socket,
+    channelId,
+    currentUserData
+  );
+
+  console.log(remoteHighlights);
 
   return (
     <div className="w-full h-full">
@@ -83,6 +96,8 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
       )}
 
       {renderRemoteCursors()}
+
+      {renderRemoteHighlights()}
 
       {activeConnectedUsers.size > 0 &&
         Array.from(activeConnectedUsers).map((user: any) => (

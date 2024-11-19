@@ -178,22 +178,44 @@ function socketEvents(io: any) {
           to: number;
         };
         user: {
-          id: string;
           name: string;
           color: string;
         };
       }) => {
-        socket.to(data.channelId).emit("cursor-move", data.cursor);
-
         if (!data.user || !data.user.color) {
           console.error("Invalid user data received:", data);
           return;
         }
 
         socket.broadcast.emit("remote-cursor", data);
-        console.log(data)
+        console.log("Cursor update", data);
       }
     );
+
+    socket.on(
+      "highlight-update",
+      (data: {
+        channelId: string;
+        highlight: {
+          user: {
+            name: string;
+            color: string;
+          };
+          from: number;
+          to: number;
+        };
+      }) => {
+
+        if (!data.highlight.user || !data.highlight.user.color) {
+          console.error("Invalid user data received:", data);
+          return;
+        }
+
+        socket.broadcast.emit("remote-highlight", data.highlight);
+
+        console.log("Highlight update", data);
+      }
+    )
 
     socket.on(
       "request-access",
