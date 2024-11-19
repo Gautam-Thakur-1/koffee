@@ -52,7 +52,7 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
     };
   }, [editor, socket, ydoc, handleInitialState, handleUpdate, updateHandler]);
 
-  if (!editor || !socket) {
+  if (!editor ) {
     return error ? <div>{toast.error(error)}</div> : null;
   }
 

@@ -1,10 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Editor } from "@tiptap/react";
 import { Socket } from "socket.io-client";
 import { UserCursor } from "../types";
 import { getRandomColor } from "../utils/colors";
-import { Decoration, DecorationSet } from "prosemirror-view";
-
 
 export const useCustomCursorTracking = (
   editor: Editor | null,
@@ -90,6 +88,12 @@ export const useCustomCursorTracking = (
     };
   }, [editor, socket, channelId, currentUser]);
 
+  // Calculate cursor position based on from/to
+  const calculateCursorPos = (cursor: { from: number; to: number }) => {
+    const { from, to } = cursor;
+    return from === to ? from : Math.min(from, to);
+  };
+
   // Render remote cursors
   const renderRemoteCursors = () => {
     return remoteCursors.map((remoteCursor) => (
@@ -102,6 +106,14 @@ export const useCustomCursorTracking = (
           width: "2px",
           height: "1.5em",
           // Calculate position based on cursor.from
+          left: `${
+            editor?.view.coordsAtPos(calculateCursorPos(remoteCursor.cursor))
+              .left
+          }px`,
+          top: `${
+            editor?.view.coordsAtPos(calculateCursorPos(remoteCursor.cursor))
+              .top
+          }px`,
         }}
       >
         <span
