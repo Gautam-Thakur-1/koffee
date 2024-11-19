@@ -10,6 +10,12 @@ const adminSocketIdMap = new Map();
 // Access Request userId to channelId map
 const accessRequestMap = new Map();
 
+// Map to store connected users with their socketId and userName
+const activeConnectedUsers = new Map<
+  string,
+  { socketId: string; userName: string }
+>();
+
 // Cache Map
 const activeCanvas = new Map();
 
@@ -48,7 +54,24 @@ function socketEvents(io: any) {
             }
           }
 
-          console.log("User joined channel", channelId);
+          const user = await User.findById(userId);
+
+          if (!user) {
+            return socket.emit("error", "User not found");
+          }
+
+          activeConnectedUsers.set(userId, {
+            socketId: socket.id,
+            userName: user.name,
+          });
+
+          // Emit the list of connected users
+          socket.emit(
+            "sync-members",
+            Array.from(activeConnectedUsers.values())
+          );
+
+          console.log(activeConnectedUsers);
 
           // Join the channel room
           socket.join(channelId);
@@ -113,6 +136,17 @@ function socketEvents(io: any) {
             const remainingClients =
               io.sockets.adapter.rooms.get(channelId)?.size || 0;
 
+            // Remove user from activeConnectedUsers map
+            const user = activeConnectedUsers.get(userId);
+            if (user?.socketId === socket.id) {
+              activeConnectedUsers.delete(userId);
+            }
+
+            socket.emit(
+              "sync-members",
+              Array.from(activeConnectedUsers.values())
+            );
+
             // Update the channel member count
             socket.to(channelId).emit("channel-members", remainingClients);
 
@@ -132,6 +166,32 @@ function socketEvents(io: any) {
           console.error("ERROR_JOINING_CHANNEL", error);
           socket.emit("error", "Failed to join Channel");
         }
+      }
+    );
+
+    socket.on(
+      "cursor-update",
+      (data: {
+        channelId: string;
+        cursor: {
+          from: number;
+          to: number;
+        };
+        user: {
+          id: string;
+          name: string;
+          color: string;
+        };
+      }) => {
+        socket.to(data.channelId).emit("cursor-move", data.cursor);
+
+        if (!data.user || !data.user.color) {
+          console.error("Invalid user data received:", data);
+          return;
+        }
+
+        socket.broadcast.emit("remote-cursor", data);
+        console.log(data)
       }
     );
 
@@ -220,6 +280,13 @@ function socketEvents(io: any) {
             );
             accessRequestMap.delete(userId);
           }
+
+          // Add user to active connected users
+          const user = await User.findById(userId);
+          activeConnectedUsers.set(userId, {
+            socketId: requestingSocketId,
+            userName: user.name,
+          });
 
           // Update channel members count
           const roomSize = io.sockets.adapter.rooms.get(channelId)?.size || 0;

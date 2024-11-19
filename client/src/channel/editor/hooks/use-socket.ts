@@ -3,6 +3,7 @@ import { Socket, io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { ConnectionStatusType, RequestType } from "../types";
+import useActiveUserStore from "../../../stores/useActiveUserStore";
 
 export const useSocket = (
   channelId: string,
@@ -16,6 +17,10 @@ export const useSocket = (
   const [userAccessRequests, setUserAccessRequests] = useState<RequestType[]>(
     []
   );
+
+  const { activeConnectedUsers, setActiveConnectedUsers } =
+    useActiveUserStore();
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,6 +40,10 @@ export const useSocket = (
       } else {
         setError("Invalid connection type");
       }
+    });
+
+    socket.on("sync-members", (members) => {
+      setActiveConnectedUsers(members);
     });
 
     socket.on("access-granted", () => {
@@ -79,5 +88,6 @@ export const useSocket = (
     connectionStatus,
     userAccessRequests,
     setUserAccessRequests,
+    activeConnectedUsers,
   };
 };

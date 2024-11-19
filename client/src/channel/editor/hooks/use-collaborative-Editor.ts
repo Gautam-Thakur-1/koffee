@@ -7,7 +7,9 @@ import StarterKit from "@tiptap/starter-kit";
 import { Socket } from "socket.io-client";
 import { decodeUpdate, encodeUpdate } from "../../../lib/editor-helper";
 
-export const useCollaborativeEditor = (socket: Socket | null) => {
+export const useCollaborativeEditor = (
+  socket: Socket | null,
+) => {
   const [ydoc] = useState(() => new Y.Doc());
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -63,7 +65,9 @@ export const useCollaborativeEditor = (socket: Socket | null) => {
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        history: false,
+      }),
       Collaboration.configure({
         document: ydoc,
         field: "content",

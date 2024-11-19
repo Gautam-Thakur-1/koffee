@@ -7,6 +7,9 @@ import { useCollaborativeEditor } from "./hooks/use-collaborative-Editor";
 import { AccessRequestHandler } from "./access-request-handler";
 import ChannelNav from "../channel-nav";
 import ConnectionStatusPage from "../connection-status-page";
+import { useCustomCursorTracking } from "./hooks/use-custom-cursor-tracking";
+import useAuthStore from "../../stores/useAuthStore";
+import { getRandomColor } from "./utils/colors";
 
 interface EditorProps {
   channelId: string;
@@ -18,12 +21,18 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
   const queryParams = new URLSearchParams(location.search);
   const connectionType = queryParams.get("type");
 
+  const randomColor = getRandomColor();
+
+  const authStore: any = useAuthStore();
+  const user = authStore.user;
+
   const {
     socket,
     error,
     connectionStatus,
     userAccessRequests,
     setUserAccessRequests,
+    activeConnectedUsers,
   } = useSocket(channelId, userId, connectionType);
 
   const { editor, ydoc, handleUpdate, handleInitialState, updateHandler } =
@@ -43,7 +52,7 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
     };
   }, [editor, socket, ydoc, handleInitialState, handleUpdate, updateHandler]);
 
-  if (!editor) {
+  if (!editor || !socket) {
     return error ? <div>{toast.error(error)}</div> : null;
   }
 
@@ -52,6 +61,16 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
       prevRequests.filter((request) => request.userId !== userId)
     );
   };
+
+  const { renderRemoteCursors } = useCustomCursorTracking(
+    editor,
+    socket,
+    channelId,
+    {
+      name: user.userName,
+      color: randomColor,
+    }
+  );
 
   return (
     <div className="w-full h-full">
@@ -62,6 +81,13 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
       {connectionStatus !== "connected" && (
         <ConnectionStatusPage connectionStatus={connectionStatus} />
       )}
+
+      {renderRemoteCursors()}
+
+      {activeConnectedUsers.size > 0 &&
+        Array.from(activeConnectedUsers).map((user: any) => (
+          <span key={user.userId}></span>
+        ))}
 
       {connectionStatus === "connected" && (
         <div className="p-4 w-full h-full mt-12 max-w-xl mx-auto">
