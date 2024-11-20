@@ -30,7 +30,7 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
   const currentUserData = {
     name: user.userName,
     color: randomColor,
-  }
+  };
 
   const {
     socket,
@@ -43,7 +43,6 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
 
   const { editor, ydoc, handleUpdate, handleInitialState, updateHandler } =
     useCollaborativeEditor(socket);
-
 
   React.useEffect(() => {
     if (!socket || !editor) return;
@@ -59,7 +58,7 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
     };
   }, [editor, socket, ydoc, handleInitialState, handleUpdate, updateHandler]);
 
-  if (!editor ) {
+  if (!editor) {
     return error ? <div>{toast.error(error)}</div> : null;
   }
 
@@ -76,14 +75,8 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
     currentUserData
   );
 
-  const {remoteHighlights ,renderRemoteHighlights } = useCollaborativeHighlight(
-    editor,
-    socket,
-    channelId,
-    currentUserData
-  );
-
-  console.log(remoteHighlights);
+  // const { remoteHighlights, renderRemoteHighlights } =
+  //   useCollaborativeHighlight(editor, socket, channelId, currentUserData);
 
   return (
     <div className="w-full h-full">
@@ -97,7 +90,7 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
 
       {renderRemoteCursors()}
 
-      {renderRemoteHighlights()}
+      {/* {renderRemoteHighlights()} */}
 
       {activeConnectedUsers.size > 0 &&
         Array.from(activeConnectedUsers).map((user: any) => (

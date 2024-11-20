@@ -192,30 +192,29 @@ function socketEvents(io: any) {
       }
     );
 
-    socket.on(
-      "highlight-update",
-      (data: {
-        channelId: string;
-        highlight: {
-          user: {
-            name: string;
-            color: string;
-          };
-          from: number;
-          to: number;
-        };
-      }) => {
+    // socket.on(
+    //   "highlight-update",
+    //   (data: {
+    //     channelId: string;
+    //     highlight: {
+    //       user: {
+    //         name: string;
+    //         color: string;
+    //       };
+    //       from: number;
+    //       to: number;
+    //     };
+    //   }) => {
+    //     if (!data.highlight.user || !data.highlight.user.color) {
+    //       console.error("Invalid user data received:", data);
+    //       return;
+    //     }
 
-        if (!data.highlight.user || !data.highlight.user.color) {
-          console.error("Invalid user data received:", data);
-          return;
-        }
+    //     socket.broadcast.emit("remote-highlight", data.highlight);
 
-        socket.broadcast.emit("remote-highlight", data.highlight);
-
-        console.log("Highlight update", data);
-      }
-    )
+    //     console.log("Highlight update", data);
+    //   }
+    // );
 
     socket.on(
       "request-access",
