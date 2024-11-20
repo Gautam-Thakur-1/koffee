@@ -5,12 +5,12 @@ import toast from "react-hot-toast";
 import { useSocket } from "./hooks/use-socket";
 import { useCollaborativeEditor } from "./hooks/use-collaborative-Editor";
 import { AccessRequestHandler } from "./access-request-handler";
-import ChannelNav from "../channel-nav";
-import ConnectionStatusPage from "../connection-status-page";
+import ChannelNav from "./components/channel-nav";
+import ConnectionStatusPage from "./components/connection-status-page";
 import { useCustomCursorTracking } from "./hooks/use-custom-cursor-tracking";
 import useAuthStore from "../../stores/useAuthStore";
 import { getRandomColor } from "./utils/colors";
-import { useCollaborativeHighlight } from "./hooks/use-collaborative-highlighting";
+import CommandMenu from "./components/command-menu";
 
 interface EditorProps {
   channelId: string;
@@ -26,6 +26,8 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
 
   const authStore: any = useAuthStore();
   const user = authStore.user;
+
+  const [keyDown, setKeyDown] = React.useState("");
 
   const currentUserData = {
     name: user.userName,
@@ -78,6 +80,8 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
   // const { remoteHighlights, renderRemoteHighlights } =
   //   useCollaborativeHighlight(editor, socket, channelId, currentUserData);
 
+  
+
   return (
     <div className="w-full h-full">
       <div className="w-full fixed top-0">
@@ -90,6 +94,8 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
 
       {renderRemoteCursors()}
 
+      <CommandMenu editor={editor} keyDown={keyDown} />
+
       {/* {renderRemoteHighlights()} */}
 
       {activeConnectedUsers.size > 0 &&
@@ -99,7 +105,7 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
 
       {connectionStatus === "connected" && (
         <div className="p-4 w-full h-full mt-12 max-w-xl mx-auto">
-          <EditorContent editor={editor} />
+          <EditorContent editor={editor} onKeyDown={(e) => setKeyDown(e.key)} />
         </div>
       )}
 
