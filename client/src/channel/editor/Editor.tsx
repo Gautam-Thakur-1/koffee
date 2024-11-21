@@ -80,8 +80,6 @@ const Editor: React.FC<EditorProps> = ({ channelId, userId }) => {
   // const { remoteHighlights, renderRemoteHighlights } =
   //   useCollaborativeHighlight(editor, socket, channelId, currentUserData);
 
-  
-
   return (
     <div className="w-full h-full">
       <div className="w-full fixed top-0">

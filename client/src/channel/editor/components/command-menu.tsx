@@ -1,11 +1,7 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  KeyboardEvent as ReactKeyboardEvent,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import { Editor } from "@tiptap/react";
 import { Bold, Heading1, Italic } from "lucide-react";
+import { CommandType } from "../types";
 
 const CommandMenu = ({
   editor,
@@ -16,11 +12,8 @@ const CommandMenu = ({
 }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [filteredCommands, setFilteredCommands] = useState<
-    { name: string; action: () => boolean; icon: React.ReactElement }[]
-  >([]);
+  const [filteredCommands, setFilteredCommands] = useState<CommandType[]>([]);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
-
 
   const commands = [
     {
@@ -43,8 +36,6 @@ const CommandMenu = ({
   ];
 
   const menuRef = useRef(null);
-
-  // editor.chain().focus().toggleBold().run();
 
   useEffect(() => {
     if (keyDown === "/") {
@@ -81,7 +72,7 @@ const CommandMenu = ({
     }
   }, [query]);
 
-  const handleCommandSelect = (command: any) => {
+  const handleCommandSelect = (command: CommandType) => {
     command.action();
     setMenuOpen(false);
     setQuery("");
@@ -92,7 +83,7 @@ const CommandMenu = ({
       {isMenuOpen && (
         <div
           ref={menuRef}
-          className="shadow-md rounded-md w-44 absolute bg-white z-10 border"
+          className="shadow-md min-h-8 rounded-md w-44 absolute bg-white z-10 border"
           style={{
             position: "absolute",
             top: `${menuPosition.top}px`,
@@ -109,6 +100,10 @@ const CommandMenu = ({
               {command.name}
             </div>
           ))}
+
+          {filteredCommands.length === 0 && (
+            <div className="px-4 py-1 text-neutral-500">No commands found</div>
+          )}
         </div>
       )}
     </div>
