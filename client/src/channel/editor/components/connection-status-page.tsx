@@ -1,5 +1,5 @@
 import { CheckCircle2 } from "lucide-react";
-import WaitingLoader from "../components/waiting-loader";
+import WaitingLoader from "../../../components/waiting-loader";
 
 const ConnectionStatusPage = ({
   connectionStatus,

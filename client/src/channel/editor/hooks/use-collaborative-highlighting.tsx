@@ -21,7 +21,6 @@ export const useCollaborativeHighlight = (
   }
 ) => {
   const [remoteHighlights, setRemoteHighlights] = useState<Highlight[]>([]);
-  const [userColors, setUserColors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!editor || !socket) return;
@@ -30,8 +29,8 @@ export const useCollaborativeHighlight = (
     const handleSelectionChange = () => {
       const { from, to } = editor.state.selection;
 
-      // Only emit if there's an actual selection (from !== to)
       if (from !== to) {
+        // There is a selection - emit highlight
         socket.emit("highlight-update", {
           channelId,
           highlight: {
@@ -40,88 +39,99 @@ export const useCollaborativeHighlight = (
             to,
           },
         });
+      } else {
+        // No selection - clear highlight
+        socket.emit("clear-highlight", {
+          channelId,
+          username: currentUser.name,
+        });
       }
     };
 
     // Listen for remote highlights
     const handleRemoteHighlight = (highlightData: Highlight) => {
-      setUserColors((prev) => ({
-        ...prev,
-        [highlightData.user.name]: highlightData.user.color,
-      }));
-
       setRemoteHighlights((prev) => {
         // Remove existing highlight for this user
         const filtered = prev.filter(
           (h) => h.user.name !== highlightData.user.name
         );
 
-        // Add new highlight
-        return [
-          ...filtered,
-          {
-            ...highlightData,
-            user: {
-              ...highlightData.user,
-              color: userColors[highlightData.user.name],
-            },
-          },
-        ];
+        // Add new highlight, preserving the original user color
+        return [...filtered, highlightData];
       });
     };
 
     // Remove highlight when user stops selecting
     const handleRemoteHighlightClear = (username: string) => {
-      setRemoteHighlights((prev) => prev.filter((h) => h.user.name !== username));
+      setRemoteHighlights((prev) =>
+        prev.filter((h) => h.user.name !== username)
+      );
     };
 
     // Attach event listeners
     editor.on("selectionUpdate", handleSelectionChange);
     socket.on("remote-highlight", handleRemoteHighlight);
-    socket.on("clear-highlight", handleRemoteHighlightClear);
+    socket.on("remote-clear-highlight", handleRemoteHighlightClear);
 
-    // Cleanup
+    // Clear all highlights when unmounting
     return () => {
       editor.off("selectionUpdate", handleSelectionChange);
       socket.off("remote-highlight", handleRemoteHighlight);
       socket.off("clear-highlight", handleRemoteHighlightClear);
+
+      // Clear this user's highlight when unmounting
+      socket.emit("clear-highlight", {
+        channelId,
+        username: currentUser.name,
+      });
     };
   }, [editor, socket, channelId, currentUser]);
 
-  // Render remote highlights
+  // Render remote highlights with error handling for coordinates
   const renderRemoteHighlights = () => {
-    return remoteHighlights.map((highlight) => (
-      <div
-        key={`highlight-${highlight.user.name}`}
-        style={{
-          position: "absolute",
-          backgroundColor: `${highlight.user.color}50`, // Semi-transparent
-          left: `${editor?.view.coordsAtPos(highlight.from)?.left || 0}px`,
-          top: `${editor?.view.coordsAtPos(highlight.from)?.top || 0}px`,
-          width: `${
-            (editor?.view?.coordsAtPos(highlight.to)?.right || 0) -
-            (editor?.view?.coordsAtPos(highlight.from)?.left || 0)
-          }px`,
-          height: "1.5em",
-          pointerEvents: "none",
-          zIndex: 10,
-        }}
-      >
-        <span
+    return remoteHighlights.map((highlight) => {
+      // Get coordinates safely
+      const fromCoords = editor?.view.coordsAtPos(highlight.from);
+      const toCoords = editor?.view.coordsAtPos(highlight.to);
+
+      if (!fromCoords || !toCoords) return null;
+
+      const width = toCoords.right - fromCoords.left;
+
+      // Don't render invalid highlights
+      if (width <= 0) return null;
+
+      return (
+        <div
+          key={`highlight-${highlight.user.name}-${highlight.from}-${highlight.to}`}
           style={{
             position: "absolute",
-            top: "-1.5em",
-            backgroundColor: highlight.user.color,
-            color: "white",
-            padding: "2px 4px",
-            borderRadius: "3px",
-            fontSize: "0.7em",
+            backgroundColor: `${highlight.user.color}50`,
+            left: `${fromCoords.left}px`,
+            top: `${fromCoords.top}px`,
+            width: `${width}px`,
+            height: "1.5em",
+            pointerEvents: "none",
+            zIndex: 10,
           }}
         >
-          {highlight.user.name}
-        </span>
-      </div>
-    ));
+          <span
+            style={{
+              position: "absolute",
+              top: "-1.5em",
+              backgroundColor: highlight.user.color,
+              color: "white",
+              padding: "2px 4px",
+              borderRadius: "3px",
+              fontSize: "0.7em",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {highlight.user.name}
+          </span>
+        </div>
+      );
+    });
   };
 
   return {

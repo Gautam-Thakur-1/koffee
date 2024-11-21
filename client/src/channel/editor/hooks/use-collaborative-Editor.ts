@@ -78,7 +78,7 @@ export const useCollaborativeEditor = (
     editorProps: {
       attributes: {
         class:
-          "h-full mx-auto focus:outline-none prose prose-sm sm:prose lg:prose-lg",
+          "h-full mx-auto focus:outline-none prose prose-sm sm:prose lg:prose-lg whitespace-pre-wrap break-words overflow-auto",
       },
     },
   });
