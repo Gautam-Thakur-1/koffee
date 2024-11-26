@@ -18,6 +18,8 @@ import WorkspaceTeams from "./components/dashboard/workspace/workspace-teams.tsx
 import WorkspaceProjects from "./components/dashboard/workspace/workspace-projects.tsx";
 import ProfileSetting from "./components/dashboard/user/profile-setting.tsx";
 import Account from "./components/dashboard/user/account.tsx";
+import ChannelPage from "./pages/channel-page.tsx";
+import { Toaster as ShadcnToaster } from "./components/ui/toaster.tsx";
 
 const Main = () => {
   const authStore: any = useAuthStore();
@@ -51,6 +53,10 @@ const Main = () => {
       element: isAuthenticated ? <Navigate to="/user/dashboard" /> : <Login />,
     },
     {
+      path: "/channel/:channelId",
+      element: <ChannelPage />,
+    },
+    {
       path: "/user/dashboard",
       element: protectRoute(<DashboardLayout />),
       children: [
@@ -67,6 +73,7 @@ const Main = () => {
 
   return (
     <StrictMode>
+      <ShadcnToaster />
       <Toaster />
       <RouterProvider router={router} />
     </StrictMode>

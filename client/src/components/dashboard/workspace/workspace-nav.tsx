@@ -1,7 +1,6 @@
 import {
   AtSign,
   DollarSign,
-  Grid2X2,
   LayoutPanelTop,
   Settings2,
   User2,
@@ -47,7 +46,7 @@ const WorkspaceNav = ({ userName }: WorkspaceNavProps) => {
 
       <div className="flex flex-col w-full items-start my-4">
         {workspaceRoutes.map((route) => (
-          <Link to={route.path} className="w-full">
+          <Link to={route.path} className="w-full" key={route.path}>
             <Button
               variant="ghost"
               className={`w-full flex justify-start ${
@@ -67,7 +66,7 @@ const WorkspaceNav = ({ userName }: WorkspaceNavProps) => {
         <h1 className="font-light text-zinc-500 p-2">Settings</h1>
 
         {userSettingsRoutes.map((route) => (
-          <Link to={route.path} className="w-full">
+          <Link to={route.path} className="w-full" key={route.path}>
             <Button
               variant="ghost"
               className={`w-full flex justify-start ${

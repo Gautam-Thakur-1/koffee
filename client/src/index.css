@@ -4,14 +4,16 @@
 
 @font-face {
   font-family: "Geist";
-  src: url("../node_modules/geist/dist/fonts/geist-sans/Geist-Regular.woff2") format("woff2");
+  src: url("../node_modules/geist/dist/fonts/geist-sans/Geist-Regular.woff2")
+    format("woff2");
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Geist";
-  src: url("../node_modules/geist/dist/fonts/geist-sans/Geist-Bold.woff2") format("woff2");
+  src: url("../node_modules/geist/dist/fonts/geist-sans/Geist-Bold.woff2")
+    format("woff2");
   font-weight: 600;
   font-style: normal;
 }
@@ -20,8 +22,6 @@ body {
   font-family: "Geist", sans-serif;
   overflow-x: hidden;
 }
-
-
 
 @media (prefers-color-scheme: light) {
   :root {
@@ -99,4 +99,22 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* cursor css*/
+.remote-cursor {
+  pointer-events: none;
+  /* Prevent interference with editing */
+  z-index: 10;
+}
+
+.cursor-label {
+  position: absolute;
+  top: -1.5em;
+  left: 0;
+  background-color: var(--cursor-color, #000);
+  color: white;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.7em;
 }
